@@ -4,7 +4,8 @@
 
 create table "User"
 (
-	email text primary key,
+	user_id int primary key,
+	email text,
 	first_name text,
 	middle_initial text,
 	last_name text,
@@ -60,40 +61,40 @@ create table "Food"
 -- ##### USER STORED PROCEDURES START HERE ##### --
 
 -- (1) Retrieve all users (GET)
-create function list_users(out text, out text, out text, out text, out text, out text, out text, out boolean, out boolean, out boolean) returns setof record as
+create function list_users(out int, out text, out text, out text, out text, out text, out text, out text, out boolean, out boolean, out boolean) returns setof record as
 $$
-	select email, first_name, middle_initial, last_name, password, contact_number, address, is_authenticated, is_active, is_anonymous
+	select user_id, email, first_name, middle_initial, last_name, password, contact_number, address, is_authenticated, is_active, is_anonymous
 	from "User";
 $$
 	language 'sql';
 
 	
 -- (2) Add a new user (POST)
-create function add_user(par_email text, par_firstname text, par_middlei text, par_lastname text, par_passw text, par_contactno text, par_address text) returns void as
+create function add_user(par_userid int, par_email text, par_firstname text, par_middlei text, par_lastname text, par_passw text, par_contactno text, par_address text) returns void as
 $body$
 	begin
-		insert into "User" values (par_email, par_firstname, par_middlei, par_lastname, par_passw, par_contactno, par_address, True, True, True);
+		insert into "User" values (par_userid, par_email, par_firstname, par_middlei, par_lastname, par_passw, par_contactno, par_address, True, True, True);
 	end
 $body$
 	language 'plpgsql';
 
 
 -- (3) Retrieve a user (GET)
-create function get_user(in par_email text, out text, out text, out text, out text, out text, out text, out text, out boolean, out boolean, out boolean) returns setof record as
+create function get_user(in par_user_id int, out int, out text, out text, out text, out text, out text, out text, out text, out boolean, out boolean, out boolean) returns setof record as
 $$
-	select email, first_name, middle_initial, last_name, password, contact_number, address, is_authenticated, is_active, is_anonymous
+	select user_id, email, first_name, middle_initial, last_name, password, contact_number, address, is_authenticated, is_active, is_anonymous
 	from "User";
-	where email = par_email;
+	where user_id = par_user_id;
 $$
 	language 'sql';
 
 
 -- (4) Update a user (PUT)
-create function update_user(par_email text, par_firstname text, par_middlei text, par_lastname text, par_passw text, par_contactno text, par_address text) returns void as
+create function update_user(par_userid int, par_email text, par_firstname text, par_middlei text, par_lastname text, par_passw text, par_contactno text, par_address text) returns void as
 $$
 	update "User"
-	set first_name = par_firstname, middle_initial = par_middlei, last_name = par_lastname, password = par_passw, contact_number = par_contactno, address = par_address
-	where email = par_email;
+	set email = par_email, first_name = par_firstname, middle_initial = par_middlei, last_name = par_lastname, password = par_passw, contact_number = par_contactno, address = par_address
+	where user_id = par_userid;
 $$
 	language 'sql';
 

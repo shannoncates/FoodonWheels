@@ -2,9 +2,9 @@
 
 
 -- Users start here
-insert into "User" values ('paul@gmail.com', 'Paul', 'F', 'Lee', 'pass', '09061234567', 'address1', True, True, True);
-insert into "User" values ('chezlvan@gmail.com', 'Chezl', 'C', 'Salomon', 'pass2', '09061434597', 'address2', True, True, True);
-insert into "User" values ('shannoncates@gmail.com', 'Shannon', 'E', 'Teves', 'pass3', '09063234067', 'address3', True, True, True);
+insert into "User" values (1, 'paul@gmail.com', 'Paul', 'F', 'Lee', 'pass', '09061234567', 'address1', True, True, True);
+insert into "User" values (2, 'chezlvan@gmail.com', 'Chezl', 'C', 'Salomon', 'pass2', '09061434597', 'address2', True, True, True);
+insert into "User" values (3, 'shannoncates@gmail.com', 'Shannon', 'E', 'Teves', 'pass3', '09063234067', 'address3', True, True, True);
 -- Users end here
 
 
