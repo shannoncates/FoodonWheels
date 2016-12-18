@@ -55,6 +55,25 @@ create table "Food"
 	is_active boolean default True
 );
 
+create table "Order"
+(
+	order_id int primary key,
+	user_id int references "User",
+	food_id int references "Food",
+	is_active boolean default True
+
+
+);
+
+create table "Transaction"
+(
+	transaction_id int primary key,
+	order_id int reference "Order",
+	total_bill text,
+	deliver text,
+	is active boolean default True
+);
+
 -- ##### TABLES END HERE ##### --
 
 
@@ -222,3 +241,81 @@ $$
 	language 'sql';
 
 -- ##### FOOD STORED PROCEDURES END HERE ##### --
+
+-- ##### ORDER STORED PROCEDURES STARTS HERE ##### --
+
+-- (1) Retrieve all orders where is_active = True (GET)
+create function list_orders(out int, out int, out int, out boolean) returns setof record as
+$$
+	select order_id, user_id, food_id, is_active
+	from "Order"
+	where is_active = True;
+$$
+		language 'sql';
+
+-- (2) Retrieve all foods in the DATABASE(GET)
+create function list_orders_database(out int, out int, out int, out boolean) returns setof record as
+$$
+	select order_id, user_id, food_id, is_active
+	from "Order";
+$$
+	language 'sql';
+
+-- (3) Retrieve all orders from the user who matcher the user id parameter (GET)
+create function get_orders_by_user(in par_user_id text, out int, out int, out int, out boolean) returns setof record as
+$$
+ 	select order_id, user_id, food_id, is_active
+ 	from "Order"
+ 	where is_active = True and user_id = par_user_id;
+$$
+ 	language 'sql';
+
+ -- (4) Add order (POST)
+ create function add_order(par_order_id int, par_user_id int, par_food_id int) returns void as
+$body$
+	begin
+		insert into "Order" values ( par_order_id, par_user_id, par_food_id);
+	end
+$body$
+	language 'plpgsql';
+
+-- (5) Delete order
+create function delete_order(in par_order_id int) returns void as
+$$
+	update "Order"
+	set is_active = False
+	where order_id = par_order_id;
+$$
+	language 'sql';
+
+-- (6) Update order
+create function update_order(par_order_id int, par_user_id int, par food_id) returns void as
+$$
+	update "Order"
+	set order_id = par_order_id, user_id = par_user_id, food_id = par_food_id, is is_active = True
+	where order_id = par_order_id;
+$$
+	language 'sql';
+
+
+-- ##### TRANSACTION STORED PROCEDURES START HERE ##### --
+
+-- (1) Retrieve all transaction where is_active = True(GET)
+create function list_transactions( out int, out int, out text, out text, out boolean, out text, out text) returns setof record as
+$$
+	select transaction_id, order_id, total_bill, deliver, is_active, food_quantity, food_name
+	from "Transaction"
+	where is_active = True;
+$$
+	language 'sql';
+
+-- (2) Retrieve all transaction in the DATABASE(GET)
+create function list_transactions_database( out int, out int, out text, out text, out boolean, out text, out text) returns setof record as
+$$
+	select transaction_id, order_id, total_bill, deliver, is_active, food_quantity, food_name
+	from "Transaction";
+$$
+	language 'sql';
+
+
+-- ##### TRANSACTION STORED PROCEDURES ENDS HERE ##### --
