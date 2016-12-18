@@ -17,7 +17,6 @@ import sys, os
 
 
 @app.route('/')
-#@app.route('/index')
 def index():
     return send_file("templates/index.html")
 
@@ -97,3 +96,80 @@ def register():
 	return jsonify({'status': 'ok', 'message': res[0][0]})
 
 ##################################################################
+
+
+########## RESTAURANT ##########
+@app.route('/api/restaurant/location/<int:location_id>', methods=['GET'])
+def get_restaurant_location(location_id):
+
+	location_list = spcall('list_locations', ())
+	matched_restaurant = spcall('get_restaurant_by_location', [str(location_id)])
+
+	if ((location_id > len(location_list)) or (location_id < 1) or (len(matched_restaurant)==0)):
+		return jsonify({'status': 'error', 'message': 'no match found'})
+
+	else:
+		recs = []
+		for i in matched_restaurant:
+
+			recs.append({'restaurant_id': str(i[0]),
+					'location_id': str(i[1]),
+					'restaurant_name': i[2],
+					'restaurant_info': i[3]})
+
+		return jsonify({'status': 'successful', 'match': recs})
+
+#######################################################
+
+
+########## FOOD ##########
+@app.route('/api/food/restaurant/<int:restaurant_id>', methods=['GET'])
+def get_food_restaurant(restaurant_id):
+
+
+	restaurant_list = spcall('list_restaurants', ())
+	matched_food = spcall('get_food_by_restaurant', [str(restaurant_id)])
+
+	if ((restaurant_id > len(restaurant_list)) or (restaurant_id < 1) or (len(matched_food)==0)):
+		return jsonify({'status': 'error', 'message': 'no match found'})
+
+	else:
+		recs = []
+		for i in matched_food:
+
+			recs.append({'food_id': str(i[0]),
+					'restaurant_id': str(i[1]),
+					'food_name': i[2],
+					'food_info': i[3],
+					'food_price': i[4]})
+
+		return jsonify({'status': 'successful', 'match': recs})
+
+######################################################################
+
+
+########## SEARCH ##########
+@app.route('/api/search', methods=['POST'])
+def search():
+
+	"""" Search a restaurant using keyword """
+	passedkeyword = request.form["keyword"].lower() + "%"
+	passed = [passedkeyword, 0]
+	recs = []
+	if request.form["keyword"] == "":
+			return jsonify({'status': 'no entries', 'count': 0})
+	if request.form["searchtype"] == "restaurant":
+		res = spcall('get_restaurant_starting_with', passed[:1], True)
+		for r in res:
+			recs.append({'restaurant_id': str(r[0]), 'location_id': r[1], 'restaurant_name': r[2], 'restaurant_info': r[3], 'restaurant_address': r[4], 'restaurant_number': r[5], 'is_active': str(r[6])})
+		if len(recs) == 0:
+			return jsonify({'status': 'no entries', 'count': len(recs)})
+		return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
+	else:
+		res = spcall('get_restaurant_by_location', passed[:1], True)
+		for r in res:
+			recs.append({'restaurant_id': str(r[0]), 'location_id': r[1], 'restaurant_name': r[2], 'restaurant_info': r[3], 'restaurant_address': r[4], 'restaurant_number': r[5], 'is_active': str(r[6])})
+		if len(recs) == 0:
+			return jsonify({'status': 'no entries', 'count': len(recs)})
+		return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
+####################################################################################
