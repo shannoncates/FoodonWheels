@@ -51,6 +51,7 @@ create table "Food"
 	food_name text,
 	food_info text,
 	food_price text,
+	food_quantity text,
 	is_active boolean default True
 );
 
@@ -181,10 +182,20 @@ $$
 
 -- ##### FOOD STORED PROCEDURES START HERE ##### --
 
--- (1) Retrieve all foods from the restaurant who matches the restaurant id parameter (GET)
-create function get_food_by_restaurant(in par_restaurant_id int, out int, out int, out text, out text, out text) returns setof record as
+-- (1) Retrieve all foods in the database
+create function list_foods(out int, out int, out text, out text, out text, out text) returns setof record as
 $$
-	select food_id, restaurant_id, food_name, food_info, food_price
+	select food_id, restaurant_id, food_name, food_info, food_price, food_quantity
+	from "Food"
+	where is_active = True;
+$$
+	language 'sql';
+
+
+-- (2) Retrieve all foods from the restaurant who matches the restaurant id parameter (GET)
+create function get_food_by_restaurant(in par_restaurant_id int, out int, out int, out text, out text, out text, out text) returns setof record as
+$$
+	select food_id, restaurant_id, food_name, food_info, food_price, food_quantity
 	from "Food" 
 	where is_active = True and restaurant_id = par_restaurant_id;
 $$
@@ -192,10 +203,10 @@ $$
 
 
 -- (2) Add food to tray (POST)
-create function add_food(par_food_id int, par_restaurant_id int, par_food_name text, par_food_info text, par_food_price text) returns void as
+create function add_food(par_food_id int, par_restaurant_id int, par_food_name text, par_food_info text, par_food_price text, par_food_quantity text) returns void as
 $body$
 	begin
-		insert into "Food" values (par_food_id, par_restaurant_id, par_food_name, par_food_info, par_food_price, True);
+		insert into "Food" values (par_food_id, par_restaurant_id, par_food_name, par_food_info, par_food_price, par_food_quantity, True);
 	end
 $body$
 	language 'plpgsql';
