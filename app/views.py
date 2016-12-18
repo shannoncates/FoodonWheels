@@ -9,7 +9,6 @@ from sqlalchemy import create_engine
 from models import DBconn, User
 from sqlalchemy.orm import exc
 from datetime import datetime
-#from flask.ext.socketio import emit, join_room, leave_room
 from app import app, db
 from forms import *
 import hashlib
