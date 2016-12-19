@@ -71,7 +71,9 @@ create table "Transaction"
 	order_id int reference "Order",
 	total_bill text,
 	deliver text,
+	datetransact timestamp,
 	is active boolean default True
+
 );
 
 -- ##### TABLES END HERE ##### --
@@ -301,21 +303,71 @@ $$
 -- ##### TRANSACTION STORED PROCEDURES START HERE ##### --
 
 -- (1) Retrieve all transaction where is_active = True(GET)
-create function list_transactions( out int, out int, out text, out text, out boolean, out text, out text) returns setof record as
+create function list_transactions(out int, out int, out text, out text, out timestamp, out boolean, out text, out text) returns setof record as
 $$
-	select transaction_id, order_id, total_bill, deliver, is_active, food_quantity, food_name
+	select transaction_id, order_id, total_bill, deliver, datetransact, is_active, food_quantity, food_name
 	from "Transaction"
 	where is_active = True;
 $$
 	language 'sql';
 
 -- (2) Retrieve all transaction in the DATABASE(GET)
-create function list_transactions_database( out int, out int, out text, out text, out boolean, out text, out text) returns setof record as
+create function list_transactions_database(out int, out int, out text, out text, out timestamp, out boolean, out text, out text) returns setof record as
 $$
-	select transaction_id, order_id, total_bill, deliver, is_active, food_quantity, food_name
+	select transaction_id, order_id, total_bill, deliver, datetransact, is_active, food_quantity, food_name
 	from "Transaction";
 $$
 	language 'sql';
 
+-- (3) Get the transaction of a order who matches the order id parameter (GET)
+create function show_transactions(out int, out int, out text, out text, out timestamp. out boolean, out text, out text) returns setof record as
+$$
+	select transaction_id, order_id, total_bill, deliver, datetransact, is_active, food_quantity, food_name from "Transaction"
+	where is_active = True and 	order_id = par_order_id;
+$$
+	language 'sql';
 
+-- (4) Update Transaction
+create function update_transactions(par_transaction_id int, par_order_id int, par_total_bill text, par_deliver text, par_food_quantity text, par_food_name text) returns void as
+$$
+	update "Transaction"
+	set transaction_id = par_transaction_id, order_id = par_order_id, total_bill = par_total_bill, deliver = par_deliver, is_active = True, food_quantity = par_food_quantity, food_name = par_food_name)
+	where transaction_id = par_transaction_id;
+$$
+	language 'sql';
+
+-- (5) Add Transaction
+create function add_transactions(par_transaction_id int, par_order_id int, par_total_bill text, par_deliver text, par_food_quantity text, par_food_name text) returns void as
+$body$
+	begin
+		insert into "Transaction" values (par_transaction_id, par_order_id, par_total_bill, par_deliver, par_food_quantity, par_food_name, current_timestamp, True);
+	end
+$body$
+	language 'plpgsql';
+
+-- (6) Delete Transaction
+create function delete_transactions(in par_transaction_id int) return void as
+$$
+	update "Transaction"
+	set is_active = False
+	where transaction_id = par_transaction_id;
+$$
+	language 'sql';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+)
 -- ##### TRANSACTION STORED PROCEDURES ENDS HERE ##### --
