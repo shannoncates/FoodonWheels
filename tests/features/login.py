@@ -28,7 +28,7 @@ def and_it_should_get_a_field_group1_containing_group2(step, field, expected_val
 @step(u'And   the following details will be returned')
 def and_the_following_details_will_be_returned(step):
     response_json = json.loads(world.response.data)
-assert_equals(world.response_json['entries'], response_json['entries'])
+    assert_equals(world.response_json['entries'], response_json['entries'])
 
 """Log In"""
 
@@ -43,7 +43,7 @@ def when_i_click_login_button(step):
     world.response = world.app.post('/api/login', data = json.dumps(world.login))
 
 @step(u'Then I get a \'(.*)\' response')
-def then_i_should_get_a_200_response(step, expected_status_code):
+def then_i_get_a_200_response(step, expected_status_code):
     assert_equals(world.response.status_code, int(expected_status_code))
 
 
@@ -56,4 +56,4 @@ def message_res(step):
 @step(u'And a message "Invalid email or password" is returned')
 def message_res(step):
     world.respn = json.loads(world.response.data)
-assert_equals(world.respn['message'], "Invalid email or password")
+    assert_equals(world.respn['message'], "Invalid email or password")
