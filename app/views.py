@@ -1,23 +1,33 @@
-#from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
 from flask import Flask, render_template, redirect, url_for, request, Response, flash, jsonify, send_file, send_from_directory, g
 from flask_sqlalchemy import SQLAlchemy
-#from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from sqlalchemy.orm import sessionmaker
 from werkzeug.exceptions import abort
-#from passlib.hash import sha256_crypt
+from passlib.hash import sha256_crypt
 from sqlalchemy import create_engine
 from models import DBconn, User
 from sqlalchemy.orm import exc
 from datetime import datetime
 from app import app, db
-#from forms import *
+from forms import *
 import hashlib
 import sys, os
 
 
-@app.route('/')
-def index():
-    return send_file("templates/index.html")
+############   GLOBAL ITEMS   ############
+
+
+auth = HTTPTokenAuth("bearer")
+login_manager = LoginManager()
+login_manager.init_app(app)
+key = "1290gath43quz1@"
+#ALLOWED_EXTENSIONS = set(['pdf', 'docx', 'odt'])
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+valid_endings = [".com",".edu",".ph",".net",".gov"] # valid endings for email
+
+
+##########################################
 
 
 ####################   DATABASE CONNECTION   ###################
@@ -42,38 +52,40 @@ def spcall(qry, param, commit=False):
 
 #################################################################
 
-###################### LOG IN - LOG OUT #################################
-@app.route('/api/login', methods=['POST'])
-def authentication():
-    data = json.loads(request.data)
-    password = data['password']
-
-    pw_hash = hashlib.md5(password.encode())
-
-    login = spcalls.spcall("list_users", (data['email'], pw_hash.hexdigest()))
-
-    if data['email'] == '' or not password:
-        return jsonify({'status': 'FAILED', 'message': 'Invalid email or password'})
-
-    if login[0][0] == 'ERROR':
-        status = False
-        return jsonify({'status': status, 'message': 'error'})
-    else:
-        status = True
-	return jsonify({'status': status, 'message': 'Successfully Logged In'})
-
-@app.route('/api/logout')
-def logout():
-    """ User logout function """
-    return jsonify({'status':'ok','message':'logged out'})
 
 
-#######################################################
-	
+@app.route('/', methods=['GET'])
+@app.route('/home', methods=['GET'])
+def home():
+    return send_from_directory(os.path.join(APP_ROOT, 'static', 'html'), 'index.html')
+
+
+@auth.verify_token
+def verify_token(token):
+
+	recs = spcall('list_users', ())
+
+	for element in recs:
+		if token == hashlib.md5( str(element[1] + element[5] ).encode()).hexdigest(): #email + password
+			return True
+		return False
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+	""" 404 Page Not Found Handler """
+
+	return jsonify({'status': '404', 'message': 'Sorry, the page you are looking for was not found'})
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+	""" 500 Internal Server Error """
+
+	return jsonify({'status': '500', 'message': 'Internal Server Error'})
 ###################### SIGN UP #################################
 @app.route('/api/registeruser', methods=['POST'])
 def register():
-	return send_file("templates/signup.html")
 
 	passw = request.form["password"]
 	passw = passw + key
@@ -186,148 +198,15 @@ def search():
 	if request.form["searchtype"] == "restaurant":
 		res = spcall('get_restaurant_starting_with', passed[:1], True)
 		for r in res:
-			recs.append({'restaurant_id': str(r[0]), 'location_id': r[1], 'restaurant_name': r[2], 'restaurant_info': r[3], 'restaurant_address': r[4], 'restaurant_number': r[5], 'is_active': str(r[6])})
+			recs.append({'restaurant_id': str(r[0]), 'location_id': str(r[1]), 'restaurant_name': r[2], 'restaurant_info': r[3], 'restaurant_address': r[4], 'restaurant_number': r[5], 'is_active': str(r[6])})
 		if len(recs) == 0:
 			return jsonify({'status': 'no entries', 'count': len(recs)})
 		return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
 	else:
 		res = spcall('get_restaurant_by_location', passed[:1], True)
 		for r in res:
-			recs.append({'restaurant_id': str(r[0]), 'location_id': r[1], 'restaurant_name': r[2], 'restaurant_info': r[3], 'restaurant_address': r[4], 'restaurant_number': r[5], 'is_active': str(r[6])})
+			recs.append({'restaurant_id': str(r[0]), 'location_id': str(r[1]), 'restaurant_name': r[2], 'restaurant_info': r[3], 'restaurant_address': r[4], 'restaurant_number': r[5], 'is_active': str(r[6])})
 		if len(recs) == 0:
 			return jsonify({'status': 'no entries', 'count': len(recs)})
 		return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
-####################################################################################
-
-############################## ORDER ######################################
-
-
-
-@app.route('/api/order', methods=['GET'])
-def get_all_order():
-    """ Retrieves all private messages in the database """
-
-    res = spcall('list_orders', ())
-    if 'Error' in str(res[0][0]):
-        return jsonify({'status': 'error', 'message': res[0][0]})
-
-    recs = []
-    for r in res:
-    	recs.append({'order id': r[0], 'user id': r[1], 'food id': r[2], 'is_active': r[3]})
-	return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
-
-
-@app.route('/api/order/', methods=['POST'])
-def add_transactions():
-    """ Add a new private message using a stored procedure """
-    
-    mess = spcall('list_orders_database', ())
-    orderid = len(mess) +1
-    
-    res = spcall('add_order', (orderid, usesrid, foodid, ), True)
-    if 'Error' in str(res[0][0]):
-        return jsonify({'status': 'error', 'message': res[0][0]})
-         
-	return jsonify({'status': 'ok', 'message': ''})
-
-
-
-@app.route('/api/transaction/<int:order_id>', methods=['PUT'])
-def delete_order(order_id):
-	""" Delete a feedback """
-	
-	# List all feedback id
-	order_list = spcall('list_orders', ())
-	active_order_ids = []
-	for order in order_list:
-		active_order_ids.append(order[0])  
-
-	valid_order_id = False
-
-	# Validate feedback id
-	for entry in active_order_ids:
-		if (entry == order_id):
-			valid_order_id = True
-
-	if (valid_order_id):
-		res = spcall('delete_order', str(order_id), True)
-		return jsonify({'status': 'successful', 'message': 'order successfully removed'})
-
-	return jsonify({'status': 'error', 'message': 'an error was encountered'})
-
-
-
-####################################################################################
-
-
-
-########################### TRANSACTION #################################
-
-
-@app.route('/api/transaction', methods=['GET'])
-def get_all_transaction():
-    """ Retrieves all private messages in the database """
-
-    res = spcall('list_transactions', ())
-    if 'Error' in str(res[0][0]):
-        return jsonify({'status': 'error', 'message': res[0][0]})
-
-    recs = []
-    for r in res:
-        recs.append({'transaction id': r[0], 'order id': r[1], 'total bill': r[2], 'datetransact': r[3], 'is_active': r[4]})
-	return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
-
-
-@app.route('/api/transaction/<int:order_id>', methods=['GET'])
-def get_transaction(receiverid):
-    """ Retrieves all private messages from a receiver who matches the receiver id parameter """
-
-    res = spcall('show_transactions', [str(orderid)])
-        
-
-    recs = []
-    for r in res:
-        recs.append({'transaction id': r[0], 'order id': r[1], 'total bill': r[2], 'datetransact': r[3], 'is_active': r[4]})
-    if len(recs) == 0:
-        return jsonify({'status': 'error', 'message': "message not found"})
-	return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
-
-
-
-#@app.route('/api/transaction', methods=['POST'])
-#def add_transactions():
-#    """ Add a new private message using a stored procedure """
-    
-#    mess = spcall('list_transactions_database', ())
-#    transactionid = len(mess) +1
-    
-#    res = spcall('add_transactions', (transactionid, orderid, totalbill, deliver, foodquantity, foodname), True)
-#    if 'Error' in str(res[0][0]):
-#        return jsonify({'status': 'error', 'message': res[0][0]})    
-#	return jsonify({'status': 'ok', 'message': ''})
-
-
-
-@app.route('/api/transaction/<int:order_id>', methods=['PUT'])
-def delete_transaction(feedback_id):
-	""" Delete a feedback """
-	
-	# List all feedback id
-	transaction_list = spcall('list_transactions', ())
-	active_transaction_ids = []
-	for transaction in transaction_list:
-		active_transaction_ids.append(transaction[0])  
-
-	valid_transaction_id = False
-
-	# Validate feedback id
-	for entry in active_transaction_ids:
-		if (entry == transaction_id):
-			valid_transaction_id = True
-
-	if (valid_transaction_id):
-		res = spcall('delete_transactions', str(transaction_id), True)
-		return jsonify({'status': 'successful', 'message': 'transaction successfully removed'})
-
-	return jsonify({'status': 'error', 'message': 'an error was encountered'})
 ####################################################################################

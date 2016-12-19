@@ -9,4 +9,4 @@ db = SQLAlchemy(app)
 app.debug = True
 
 
-from app import views
+from app import views, models
