@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=signInCallback"></script>
+
+<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+
+</head>
+
+
+<body>
+
+<div id="signinButton">
+    <span class="g-signin"
+        data-scope="openid"
+        data-clientid="13140951618-15nik769cellkubaqnjk5facdib2dh4d.apps.googleusercontent.com"
+        data-redirecturi="postmessage"
+        data-accesstype="offline"
+        data-cookiepolicy="single_host_origin"
+        data-callback="signInCallback"
+        data-approvalprompt="force">
+    </span>
+</div>
+<div id="result"></div>
+
+<script type="text/javascript">
+  function signInCallback(authResult) {
+      if (authResult.code) {
+          // Hide sign in button
+          $('#signinButton').css('display', 'none');
+          // Send one-time-use code to server & dispaly response message
+          $.ajax({
+              type: 'POST',
+              url: '/gconnect?state={{state}}',
+              processData: false,
+              contentType: 'application/octet-stream; charset=utf-8',
+              data: authResult.code,
+              success: function(result) {
+                  if (result) {
+                      $('#result').html('Login successful!<br>' + result + '<br>Redirecting...');
+                      setTimeout(function() {
+                          window.location.href = '/restaurant';
+                      }, 4000);
+                  }
+              }
+          });
+      } else if (authResult.error) {
+          console.log('There was an error: ', + authResult.error);
+      } else {
+          $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+      }
+  }
+</script>
+
+
+  </body>
+
+  </html>
