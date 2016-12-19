@@ -135,6 +135,35 @@ def register():
 ##################################################################
 
 
+###################### LOG IN - LOG OUT #################################
+@app.route('/api/login', methods=['POST'])
+def authentication():
+    data = json.loads(request.data)
+    password = data['password']
+
+    pw_hash = hashlib.md5(password.encode())
+
+    login = spcalls.spcall("list_users", (data['email'], pw_hash.hexdigest()))
+
+    if data['email'] == '' or not password:
+        return jsonify({'status': 'FAILED', 'message': 'Invalid email or password'})
+
+    if login[0][0] == 'ERROR':
+        status = False
+        return jsonify({'status': status, 'message': 'error'})
+    else:
+        status = True
+	return jsonify({'status': status, 'message': 'Successfully Logged In'})
+
+@app.route('/api/logout')
+def logout():
+    """ User logout function """
+    return jsonify({'status':'ok','message':'logged out'})
+
+
+#######################################################
+
+
 ########## RESTAURANT ##########
 @app.route('/api/restaurant/location/<int:location_id>', methods=['GET'])
 def get_restaurant_location(location_id):
