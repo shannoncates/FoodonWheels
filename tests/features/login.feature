@@ -31,4 +31,4 @@ Feature: Login
               | shannoncates@gmail.com |          |
         When I click login button
         Then I get a '200' response
-And a message "Invalid email or password" is returned
+        And a message "Invalid email or password" is returned
