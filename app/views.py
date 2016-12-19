@@ -15,7 +15,6 @@ import hashlib
 import sys, os
 
 
-
 @app.route('/')
 def index():
     return send_file("templates/index.html")
@@ -203,7 +202,7 @@ def search():
 ############################## ORDER ######################################
 
 
-@auth.login_required
+
 @app.route('/api/order', methods=['GET'])
 def get_all_order():
     """ Retrieves all private messages in the database """
@@ -214,11 +213,11 @@ def get_all_order():
 
     recs = []
     for r in res:
-        recs.append({'order id': r[0], 'user id': r[1], 'food id': 'is_active': r[2]})
-return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
+    	recs.append({'order id': r[0], 'user id': r[1], 'food id': r[2], 'is_active': r[3]})
+	return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
 
-@auth.login_required
-@app.route('/api/order/<>', methods=['POST'])
+
+@app.route('/api/order/', methods=['POST'])
 def add_transactions():
     """ Add a new private message using a stored procedure """
     
@@ -229,10 +228,10 @@ def add_transactions():
     if 'Error' in str(res[0][0]):
         return jsonify({'status': 'error', 'message': res[0][0]})
          
-return jsonify({'status': 'ok', 'message': ''})
+	return jsonify({'status': 'ok', 'message': ''})
 
 
-@auth.login_required
+
 @app.route('/api/transaction/<int:order_id>', methods=['PUT'])
 def delete_order(order_id):
 	""" Delete a feedback """
@@ -254,7 +253,7 @@ def delete_order(order_id):
 		res = spcall('delete_order', str(order_id), True)
 		return jsonify({'status': 'successful', 'message': 'order successfully removed'})
 
-return jsonify({'status': 'error', 'message': 'an error was encountered'})
+	return jsonify({'status': 'error', 'message': 'an error was encountered'})
 
 
 
@@ -264,7 +263,7 @@ return jsonify({'status': 'error', 'message': 'an error was encountered'})
 
 ########################### TRANSACTION #################################
 
-@auth.login_required
+
 @app.route('/api/transaction', methods=['GET'])
 def get_all_transaction():
     """ Retrieves all private messages in the database """
@@ -276,9 +275,9 @@ def get_all_transaction():
     recs = []
     for r in res:
         recs.append({'transaction id': r[0], 'order id': r[1], 'total bill': r[2], 'datetransact': r[3], 'is_active': r[4]})
-return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
+	return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
 
-@auth.login_required
+
 @app.route('/api/transaction/<int:order_id>', methods=['GET'])
 def get_transaction(receiverid):
     """ Retrieves all private messages from a receiver who matches the receiver id parameter """
@@ -291,25 +290,24 @@ def get_transaction(receiverid):
         recs.append({'transaction id': r[0], 'order id': r[1], 'total bill': r[2], 'datetransact': r[3], 'is_active': r[4]})
     if len(recs) == 0:
         return jsonify({'status': 'error', 'message': "message not found"})
-return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
+	return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
 
 
-@auth.login_required
-@app.route('/api/transaction/<>', methods=['POST'])
-def add_transactions():
-    """ Add a new private message using a stored procedure """
+
+#@app.route('/api/transaction', methods=['POST'])
+#def add_transactions():
+#    """ Add a new private message using a stored procedure """
     
-    mess = spcall('list_transactions_database', ())
-    transactionid = len(mess) +1
+#    mess = spcall('list_transactions_database', ())
+#    transactionid = len(mess) +1
     
-    res = spcall('add_transactions', (transactionid, orderid, totalbill, deliver, foodquantity, foodname), True)
-    if 'Error' in str(res[0][0]):
-        return jsonify({'status': 'error', 'message': res[0][0]})
-         
-return jsonify({'status': 'ok', 'message': ''})
+#    res = spcall('add_transactions', (transactionid, orderid, totalbill, deliver, foodquantity, foodname), True)
+#    if 'Error' in str(res[0][0]):
+#        return jsonify({'status': 'error', 'message': res[0][0]})    
+#	return jsonify({'status': 'ok', 'message': ''})
 
 
-@auth.login_required
+
 @app.route('/api/transaction/<int:order_id>', methods=['PUT'])
 def delete_transaction(feedback_id):
 	""" Delete a feedback """
@@ -331,5 +329,5 @@ def delete_transaction(feedback_id):
 		res = spcall('delete_transactions', str(transaction_id), True)
 		return jsonify({'status': 'successful', 'message': 'transaction successfully removed'})
 
-return jsonify({'status': 'error', 'message': 'an error was encountered'})
+	return jsonify({'status': 'error', 'message': 'an error was encountered'})
 ####################################################################################
