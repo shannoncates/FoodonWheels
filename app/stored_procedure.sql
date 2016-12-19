@@ -68,10 +68,10 @@ create table "Order"
 create table "Transaction"
 (
 	transaction_id int primary key,
-	order_id int reference "Order",
+	order_id int references "Order",
 	total_bill text,
-	deliver text,
 	datetransact timestamp,
+	deliver text,
 	is active boolean default True
 
 );
@@ -263,15 +263,6 @@ $$
 $$
 	language 'sql';
 
--- (3) Retrieve all orders from the user who matcher the user id parameter (GET)
-create function get_orders_by_user(in par_user_id text, out int, out int, out int, out boolean) returns setof record as
-$$
- 	select order_id, user_id, food_id, is_active
- 	from "Order"
- 	where is_active = True and user_id = par_user_id;
-$$
- 	language 'sql';
-
  -- (4) Add order (POST)
  create function add_order(par_order_id int, par_user_id int, par_food_id int) returns void as
 $body$
@@ -305,8 +296,7 @@ $$
 -- (1) Retrieve all transaction where is_active = True(GET)
 create function list_transactions(out int, out int, out text, out text, out timestamp, out boolean, out text, out text) returns setof record as
 $$
-	select transaction_id, order_id, total_bill, deliver, datetransact, is_active, food_quantity, food_name
-	from "Transaction"
+	select transaction_id, order_id, total_bill, deliver, datetransact, is_active, food_quantity, food_name from "Transaction"
 	where is_active = True;
 $$
 	language 'sql';
@@ -327,14 +317,6 @@ $$
 $$
 	language 'sql';
 
--- (4) Update Transaction
-create function update_transactions(par_transaction_id int, par_order_id int, par_total_bill text, par_deliver text, par_food_quantity text, par_food_name text) returns void as
-$$
-	update "Transaction"
-	set transaction_id = par_transaction_id, order_id = par_order_id, total_bill = par_total_bill, deliver = par_deliver, is_active = True, food_quantity = par_food_quantity, food_name = par_food_name)
-	where transaction_id = par_transaction_id;
-$$
-	language 'sql';
 
 -- (5) Add Transaction
 create function add_transactions(par_transaction_id int, par_order_id int, par_total_bill text, par_deliver text, par_food_quantity text, par_food_name text) returns void as
@@ -354,20 +336,4 @@ $$
 $$
 	language 'sql';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-)
 -- ##### TRANSACTION STORED PROCEDURES ENDS HERE ##### --
