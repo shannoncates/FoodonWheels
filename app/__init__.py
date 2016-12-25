@@ -1,12 +1,5 @@
-from flask import Flask, render_template, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
-import os
+from flask import Flask
 
 
 app = Flask(__name__)
-app.config.from_pyfile('config.py')
-db = SQLAlchemy(app)
-app.debug = True
-
-
-from app import views, models
+from app import views
