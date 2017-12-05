@@ -3,8 +3,8 @@ Feature: Register
 
 Scenario: User Registration Sunny Case
 Given the user fills the form with these details:
-| name     |  email                       | password | is_translator|
-| makinano  | marjunmakinano@gmail.com | pass123  | 0 |
+| name     |  email                       | password |
+| mariel  | foodie@gmail.com | password  |
 When I submit the registration form
 Then I should get a '200' response
 And it will return these details:
@@ -14,8 +14,8 @@ And it will return these details:
 
 Scenario: Sign up rainy email already exists
 Given the user fills the registration form with these details:
-| name     |  email                       | password | is_translator|
-| makinano  | marjunmakinano@gmail.com | pass123  | 0 |
+| name     |  email                       | password
+| mariel  | foodie.com | password
 When I submit the registration form
 Then I should get a '200' response
 And it will return these details:
@@ -24,8 +24,8 @@ And it will return these details:
 
 Scenario: Sign up rainy no email
 Given the user fills the form with these details:
-| name     |  email                       | password | is_translator|
-| makinano  |  | pass123  | 0 |
+| name     |  email                       | password |
+| mariel  |  | password  | |
 When I submit the signup form
 Then I should get a '200' response
 And it will return these details:
@@ -34,8 +34,8 @@ And it will return these details:
 
 Scenario: Sign up rainy invalid email
 Given the user fills the form with these details:
-| name     |  email                       | password | is_translator|
-| makinano  | marjuninvalid.com | pass123  | 0 |
+| name     |  email                       | password |
+| mariel  | foodie.com | password  |
 When I submit the registration form
 Then I should get a '200' response
 And it will return these details:
@@ -45,7 +45,7 @@ And it will return these details:
 Scenario: Log in sunny
 Given signs in as:
 |email           |  password|
-|marjunmakinano@gmail.com|  pass123|
+|foodie@gmail.com|  password|
 When User signs in
 Then I should get a '200' response
 And it will return these details:
@@ -55,7 +55,7 @@ And it will return these details:
 Scenario: Log in rainy wrong password
 Given signs in as:
 |email           |  password|
-|marjunmakinano@gmail.com|  wrongpass|
+|foodie@gmail.com|  wrongpass|
 When User signs in
 Then I should get a '200' response
 And it will return these details:
@@ -65,7 +65,7 @@ And it will return these details:
 Scenario: Log in rainy email does not exist
 Given signs in as:
 |email           |  password|
-|noemailguyadasd@gmail.com|  pass123|
+|foodie@gmail.com|  password|
 When User signs in
 Then I should get a '200' response
 And it will return these details:
@@ -85,7 +85,7 @@ And it will return these details:
 Scenario: Log out sunny
 Given User is logged in as:
 | email                    |  password|
-| marjunmakinano@gmail.com |  gta|
+| foodie@gmail.com |  fhm|
 When User logs out
 Then I should get a '200' response
 And it will return these details:
@@ -95,7 +95,7 @@ And it will return these details:
 Scenario: Log out rainy 
 Given User is not logged in as:
 | email                    |  password|
-| marjunmakinano@gmail.com |  gta|
+| foodie@gmail.com |  fhm|
 When User logs out
 Then I should get a '200' response
 
