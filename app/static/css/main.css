@@ -17,6 +17,13 @@
 }
 
 
+#profilepicture {
+  height: 300px;
+  width: 300px;
+  -o-object-fit: contain;
+}
+
+
 /* Autohide navbar */
 .slideUp { top:-100px; }
 .headroom { -webkit-transition: all 0.4s ease-out; -moz-transition: all 0.4s ease-out; -o-transition: all 0.4s ease-out; transition: all 0.4s ease-out; }

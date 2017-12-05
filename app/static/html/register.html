@@ -1,0 +1,60 @@
+<script>document.title = "Register | Food on Wheels"</script>
+<center>
+    <div>
+        <div class="row">
+            <!-- Article main content -->
+            <article class="col-xs-12 maincontent">
+                <header class="page-header">
+                    <br><br><br><br><br>
+                    <h1 class="page-title">Register to our community!</h1>
+                </header>
+                <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h3 class="thin text-center">Create a new account</h3>
+                            <hr>
+                            <form name="registrationForm" id= "registrationForm">
+                                <div class="top-margin">
+                                    <label>First Name</label>
+                                    <input type="text" name="firstname" id="firstname" class="form-control" required>
+                                </div>
+                                <div class="top-margin">
+                                    <label>Last Name</label>
+                                    <input type="text" name="lastname" id="lastname" class="form-control" required>
+                                </div>
+                                <div class="top-margin">
+                                    <label>Middle Initial</label>
+                                    <input data-validation="length" data-validation-length="max1" data-validation-error-msg="Invalid" type="text" name="middleinitial" id="middleinitial" class="form-control" required>
+                                </div>
+                                <div class="top-margin">
+                                    <label>Email Address <span class="text-danger"></span></label>
+                                    <input data-validation="email" data-validation-error-msg="Invalid email address" type="text" name="email" id="email" class="form-control" required>
+                                </div>
+                                <div class="row top-margin">
+                                    <div class="col-sm-6">
+                                        <label>Password <span class="text-danger"></span></label>
+                                        <input data-validation="length alphanumeric" data-validation-length="min8" type="password" name="password" id="password" class="form-control" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label>Confirm Password <span class="text-danger"></span></label>
+                                        <input type="password" name="confirmpassword" id="confirmpassword" class="form-control" required>
+                                    </div>
+                                </div>
+                                </br>
+                                <hr>
+                                <div class="row">
+                                    <button id="registerbutton" class="btn btn-success" onclick="register();">Register</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- /Article -->
+        </div>
+    </div>
+    <div id="thankyou"></div>
+</center>
+<!-- Validate the form -->
+<script> $.validate(); </script>
+<br><br><br>

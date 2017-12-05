@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title id="title">Home | Food On Wheels</title>
+        <!-- stylesheets start here-->
+        <link rel="stylesheet" href="static/css/bootstrap.min.css">
+        <link rel="stylesheet" href="static/css/font-awesome.min.css">
+        <link rel="stylesheet" href="static/css/bootstrap-theme.css" media="screen" >
+        <link rel="stylesheet" href="static/css/main.css">
+        <link rel="shortcut icon" href="static/images/gt_favicon.png">
+        <link rel="stylesheet" href="static/AdminLTE/bootstrap/css/bootstrap.css">
+        <link rel="stylesheet" href="static/css/user1.css">
+        <link rel="stylesheet" href="static/css/bootstrap-theme.css" media="screen" >
+        <link rel="stylesheet" href="static/css/main.css">
+        <link rel="stylesheet" href="static/css/category.css">
+        <link rel="stylesheet" href="static/AdminLTE/plugins/datatables/dataTables.bootstrap.css">
+        <link rel="stylesheet" href="static/AdminLTE/dist/css/AdminLTE.min.css">
+        <link rel="stylesheet" href="static/AdminLTE/dist/css/skins/skin-blue.min.css">
+        <!-- stylesheets end here -->
+        <!-- scripts start here -->
+        <script src="static/js/jquery-2.2.1.min.js"></script>
+        <script src="static/js/bootstrap.min.js"></script>
+        <script src="static/js/angular.min.js"></script>
+        <script src="static/js/angular-route.min.js"></script>
+        <script src="static/js/angular-ui-router.js"></script>
+        <script src="static/js/js.cookie.js"></script>
+        <script src="static/js/socket.io.js"></script>
+        <script src="static/js/host.js"></script>
+        <script src="static/js/app.js"></script>
+        <script src="static/js/controllers.js"></script>
+        <script src="static/js/services.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.8/jquery.form-validator.min.js"></script>
+        <base href="/" />
+        <!-- scripts end here -->
+    </head>
+    <body ng-app="mainApp">
+        <!-- navbar starts here -->
+        <div class="navbar navbar-inverse navbar-fixed-top headroom" ng-controller="navbarController">
+            <div class="container">
+                <div class="navbar-header">
+                    <!-- Button for smallest screens -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+                    <a class="navbar-brand" href="/"><b>Food On Wheels</b></a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav pull-right multi-level" id = "navbarlist">
+                        <li><a ng-href="/">Home</a></li>
+                        <li ng-show="!authed()" id="registernav"><a ng-href="/register">Register</a></li>
+                        <li ng-show="!authed()" id="loginnav"><a ng-href="/login">Log In</a></li>
+                        <li id="logoutnav" ng-show="authed()" ><a ng-click="logout2();" style="cursor:pointer">Log out</a></li>
+                        </li> 
+                        <li ><a ng-href="/about">About</a></li>
+                        <li class="dropdown" ng-show="authed()">
+                            <a class="dropdown-toggle" data-toggle="dropdown" role="button"><span class="glyphicon glyphicon-envelope"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li style="cursor:pointer"><a data-toggle="modal" data-target="#pmModal" data-whatever="@mdo"> Create Message </a></li>
+                                <li ><a href="/inbox"> Inbox </a></li>
+                            </ul>
+                        </li>
+                        <li ng-show="authed()">
+                            <p>
+                            <div class="anchor" >
+                                <form id="search-box" method="post" action="/api/search" method="post">
+                                    <input id="search-bar" type="text" name="keyword" class="vd_menu-search-text width-60" placeholder="Search">
+                                    <span data-action="click-trigger"> <span class="separator"></span></span>
+                                    <select placeholder="Search Type" name="searchtype" id="searchtype">
+                                        <option value="user">User</option>
+                                    </select>
+                                    <a ng-href="/search" ng-click="rload();clear_search();"><span id="search" class="vd_menu-search-submit" style="cursor:pointer"><i class="fa fa-search"></i> </span></a>
+                                </form>
+                            </div>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </div>
+        <!-- navbar ends here -->
+        <!-- content starts here -->    
+        <div ng-view></div>
+        <!-- content ends here -->
+        <!-- footer starts here -->
+        <center>
+        <footer id="footer">
+            </div>
+            <div class="footer2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12 widget">
+                            <div class="widget-body">
+                                <p class="text-right">
+                                    Copyright &copy; 2017, Food On Wheels Team. Designed by <a href="http://gettemplate.com/" rel="designer">gettemplate</a> 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /row of widgets -->
+                </div>
+            </div>
+        </footer>
+        <!-- footer ends here -->
+        <div class="modal fade" id="pmModal" tabindex="-1" role="dialog" aria-labelledby="pmModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Write a Message</h4>
+                    </div>
+                    <form method="POST" class="post-form" id="pmmodalform">
+                        <div class="modal-body">
+                            <label>
+                            Recipient
+                            </label>
+                            <input type="text" class="form-control" id="receiver_id" name="receiver_id" />
+                            <label >
+                            Subject
+                            </label>
+                            <input type="text" class="form-control" id="message_title" name="message_title" />
+                            <label>Message</label>
+                            <textarea class = "form-control" rows = "5" name="message_body" id="message_body"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="pmmodalclose" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" onclick="modalpm();" class="btn btn-success">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

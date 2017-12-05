@@ -1,8 +1,10 @@
-from flask import Flask, send_file, render_template
+from flask import Flask, send_file, render_template, send_from_directory, jsonify
 from app import app
+import sys, os
+
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
-####################   DATABASE CONNECTION   ###################
 def spcall(qry, param, commit=False):
     """ Function which communicates with the database """
 
@@ -18,23 +20,34 @@ def spcall(qry, param, commit=False):
         res = [('Error: ' + str(sys.exc_info()[0]) + ' '
                + str(sys.exc_info()[1]), )]
     return res
-#################################################################
 
 
-############ LANDING PAGE #######################################
+@app.route('/', methods=['GET'])
+@app.route('/home', methods=['GET'])
+def home():
+    """ The homepage """
+
+    return send_from_directory(os.path.join(APP_ROOT, 'static', 'html'), 'index.html')
+
+    
+
+@app.errorhandler(404)
+def page_not_found(e):
+	""" 404 Page Not Found Handler """
+
+	return jsonify({'status': '404', 'message': 'Sorry, the page you are looking for was not found'})
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    """ 500 Internal Server Error """
+
+    return jsonify({'status': '500', 'message': 'Internal Server Error'})
+
 @app.route('/')
 @app.route('/index')
 def index():
 	return send_file("templates/index.html")
-################################################################
-
-
-############# SIGN UP ########################################
-@app.route('/registeruser')
-def show_register():
-	"""Show registration form"""
-
-	return render_template("signup.html")
 
 
 @app.route('/api/registeruser', methods=['POST'])
@@ -84,4 +97,41 @@ def register():
 	if 'Error' in str(res[0][0]):
 		return jsonify({'status': 'error', 'message': res[0][0]})
 	return jsonify({'status': 'ok', 'message': res[0][0]})
-##################################################################
+
+@app.route('/api/loginuser', methods=['POST'])
+def login():
+    """ User login function """
+
+    attempted_email = request.form["email"]
+    attempted_password = request.form["password"]
+    attempted_password = attempted_password + key
+    
+    attempted_password = hashlib.md5(attempted_password.encode())
+    attempted_password = attempted_password.hexdigest()
+    
+    res = spcall('list_users', ())
+    error = True
+    
+    for element in res:
+        # email element[4]
+        # password element[5]
+        if attempted_email == element[3]:
+            userinfo = {'firstname': element[0], 'lastname': element[1], 'middle_initial': element[2], 
+            'email': element[3], 'token':hashlib.md5( str(element[0] + element[4] ).encode()).hexdigest()}
+            user = User(element[0], element[1], element[2], element[3], element[4])
+            stored_password = element[4] # attempted_password should match this
+            error = False
+                  
+    
+    if error == True:
+        return jsonify({'status': 'error', 'message': 'email does not exist'})
+    if (attempted_password == stored_password):
+        return jsonify({'status': 'Successful', 'User_Information': userinfo,'message': 'Logged in successfully!'})
+    else:
+        return jsonify({'status': 'error', 'message': 'password or email is incorrect'})
+
+
+@app.route('/api/logout')
+def logout():
+    """ User logout function """
+    return jsonify({'status':'ok','message':'logged out'})
