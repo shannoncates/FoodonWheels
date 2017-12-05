@@ -1,12 +1,14 @@
-create table Users
+
+create table "User"
 (
-	id				SERIAL8 PRIMARY KEY,
-	first_name		VARCHAR(50),
-	middle_initial	VARCHAR(50),
-	last_name		VARCHAR(50),
-	contact_number	VARCHAR(50),
-	home_address	VARCHAR(50),
-	email			VARCHAR(50),
-	password		VARCHAR(50),
-	is_active		BOOLEAN DEFAULT TRUE
+  first_name text primary key,
+  last_name text,
+  middle_initial text,
+  email text unique,
+  password text,
+  is_authenticated boolean default True,
+  is_active boolean default True,
+  is_anonymous boolean default True,
+  role text
 );
+
