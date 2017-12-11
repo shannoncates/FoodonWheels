@@ -41,11 +41,21 @@ create table "Categories"
   is_active boolean default True
 );
 
-create table "Feedback"
+create table "Feedbackr"
 (
-  feedback_id text primary key,
+  feedbackr_id text primary key,
   restaurant_id text references "Restaurant",
+  user_id text references "User",
+  body text,
+  date_published timestamp,
+  is_active boolean default True
+);
+
+create table "Feedbackf"
+(
+  feedbackf_id text primary key,
   food_id text references "Food",
+  user_id text references "User",
   body text,
   date_published timestamp,
   is_active boolean default True
@@ -93,4 +103,3 @@ create table "Foodtransaction"
   total real,
   is_paid boolean default False
 );
-
