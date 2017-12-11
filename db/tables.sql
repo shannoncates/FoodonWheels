@@ -103,3 +103,87 @@ create table "Foodtransaction"
   total real,
   is_paid boolean default False
 );
+-------------------------------------------------------------------------------------------------------------------
+
+create function get_profilepicture(in par_id_number text, out text) returns text as
+$$
+  select filename
+  from "Profilepicture"
+  where prof_id = par_id_number;
+$$
+  language 'sql';
+
+
+create function updateprofilepicture(in par_id_number text, in par_filename text) returns void as
+$$
+  update "Profilepicture"
+    set filename = par_filename
+    where prof_id = par_id_number;
+$$
+  language 'sql';
+
+
+create function uploadprofilepicture(user_id text, filename text) returns void as
+$$
+  begin
+    insert into "Profilepicture" values (prof_id, filename);
+  end
+$$
+  language 'plpgsql';
+--------------------------------------------------------------------------------------------------------------------
+
+create function get_restaurantpicture(in par_id_number text, out text) returns text as
+$$
+  select filename
+  from "Restaurantpicture"
+  where respic_id = par_id_number;
+$$
+  language 'sql';
+
+
+create function updaterestaurantpicture(in par_id_number text, in par_filename text) returns void as
+$$
+  update "Restaurantpicture"
+    set filename = par_filename
+    where respic_id = par_id_number;
+$$
+  language 'sql';
+
+
+create function uploadrestaurantpicture(user_id text, filename text) returns void as
+$$
+  begin
+    insert into "Restaurantpicture" values (respic_id, filename);
+  end
+$$
+  language 'plpgsql';
+
+--------------------------------------------------------------------------------------------------------------------
+
+create function get_foodpicture(in par_id_number text, out text) returns text as
+$$
+  select filename
+  from "Foodpicture"
+  where foodpic_id = par_id_number;
+$$
+  language 'sql';
+
+
+create function updatefoodpicture(in par_id_number text, in par_filename text) returns void as
+$$
+  update "Foodpicture"
+    set filename = par_filename
+    where foodpic_id = par_id_number;
+$$
+  language 'sql';
+
+
+create function uploadfoodpicture(user_id text, filename text) returns void as
+$$
+  begin
+    insert into "Foodpicture" values (foodpic_id, filename);
+  end
+$$
+  language 'plpgsql';
+
+--------------------------------------------------------------------------------------------------------------------
