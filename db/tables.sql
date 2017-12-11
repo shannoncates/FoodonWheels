@@ -75,7 +75,7 @@ create table "Restaurantpicture"
 
 create table "Foodpicture"
 (
-  respic_id text primary key,
+  foodpic_id text primary key,
   filename text
 );
 
