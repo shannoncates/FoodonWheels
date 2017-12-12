@@ -266,6 +266,7 @@ $body$
 $body$
   language 'sql';
 
+-- (5) Update restaurant (UPDATE)
 create function update_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text) returns setof record as
 $$
   update "Restaurant"
@@ -274,10 +275,66 @@ $$
 $$
   language 'sql';
 
-create function delete_restaurant(in par_thesis_id int) returns void as
+--(6) Delete restaurant (PUT)
+create function delete_restaurant(in par_restaurant_id int) returns void as
 $$
   update "Restaurant"
   set is_active = False
   where restaurant_id = par_restaurant_id;
+$$
+  language 'sql';
+
+  --------------------------------------------------------------------------------------------------------------------
+
+-- (1) Retrieve all food where is_active = True (GET)
+create function list_food(out int, out text, out text, out text, out text, out boolean) returns setof record as
+$$
+  select food_id, restaurant_id, food_name, food_cost, food_description, is_active
+  from "Food"
+  where is_active = True;
+$$
+  language 'sql';
+
+-- (2) Retrieve all food in the DATABASE (GET)
+create function list_food_database(out int, out text, out text, out text, out text, out boolean) returns setof record as
+$$
+  select food_id, restaurant_id, food_name, food_cost, food_description, is_active
+  from "Food"
+$$
+  language 'sql';
+
+  -- (3) Retrieve the food with a certain starting with a certain string (GET)
+create function get_food_starting_with(in par_keyword text, out int, out text, out text, out text, out text, out boolean) returns setof record as
+$$
+  select food_id, restaurant_id, food_name, food_cost, food_description, is_active
+  from "Food"
+  where lower(food_name) Like par_keyword;
+$$
+  language 'sql';
+
+   -- (4) Add food (POST)
+create function add_food(par_food_id int, par_restaurant_id int, par_food_name text, par_food_cost text, par_food_description text) returns setof record as
+$body$
+  begin
+    insert into "Food" values (par_food_id, par_restaurant_id, par_food_name, par_food_cost, par_food_description, True);
+  end
+$body$
+  language 'sql';
+
+-- (5) Update food (UPDATE)
+create function update_food(par_food_id int, par_restaurant_id int, par_food_name text, par_food_cost text, par_food_description text) returns setof record as
+$$
+  update "Food"
+  set restaurant_id = par_restaurant_id, food_name = par_food_name, food_cost = par_food_cost, food_description = par_food_description, is_active = True
+  where food_id = par_food_id;
+$$
+  language 'sql';
+
+--(6) Delete restaurant (PUT)
+create function delete_food(in par_food_id int) returns void as
+$$
+  update "Food"
+  set is_active = False
+  where food_id = par_food_id;
 $$
   language 'sql';
