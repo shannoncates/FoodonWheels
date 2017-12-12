@@ -232,10 +232,52 @@ $$
   --------------------------------------------------------------------------------------------------------------------
 
 -- (1) Retrieve all restaurant where is_active = True (GET)
-create function list_restaurants(out int, out text, out text, out text, out text, out boolean) returns setof record as
+create function list_restaurant(out int, out text, out text, out text, out text, out boolean) returns setof record as
 $$
   select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
   from "Restaurant"
   where is_active = True;
+$$
+  language 'sql';
+
+-- (2) Retrieve all restaurant in the DATABASE (GET)
+create function list_restaurant_database(out int, out text, out text, out text, out text, out boolean) returns setof record as
+$$
+  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
+  from "Restaurant"
+$$
+  language 'sql';
+
+  -- (3) Retrieve the restaurant with a certain starting with a certain string (GET)
+create function get_restaurant_starting_with(in par_keyword text, out int, out text, out text, out text, out text, out boolean) returns setof record as
+$$
+  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
+  from "Restaurant"
+  where lower(restaurant_name) Like par_keyword;
+$$
+  language 'sql';
+
+   -- (4) Add restaurant (POST)
+create function add_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text) returns setof record as
+$body$
+  begin
+    insert into "Restaurant" values (par_restaurant_id, par_restaurant_name, par_restaurant_contact, par_restaurant_email, par_restaurant_address, True);
+  end
+$body$
+  language 'sql';
+
+create function update_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text) returns setof record as
+$$
+  update "Restaurant"
+  set restaurant_name = par_restaurant_name, restaurant_contact = par_restaurant_contact, restaurant_email = par_restaurant_email, restaurant_address = par_restaurant_address, is_active = True
+  where restaurant_id = par_restaurant_id;
+$$
+  language 'sql';
+
+create function delete_restaurant(in par_thesis_id int) returns void as
+$$
+  update "Restaurant"
+  set is_active = False
+  where restaurant_id = par_restaurant_id;
 $$
   language 'sql';
