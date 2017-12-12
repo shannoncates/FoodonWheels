@@ -4,15 +4,16 @@ create table "User"
   user_id text primary key,
   fname text,
   lname text,
-  mname text,
+  minitial text,
   email text unique,
   user_location text,
   user_contact text,
   password text,
-  awardpoints real default 0, 
   is_active boolean default True,
   role text
 );
+
+create table ""
 
 create table "Restaurant"
 (
@@ -187,3 +188,52 @@ $$
   language 'plpgsql';
 
 --------------------------------------------------------------------------------------------------------------------
+
+
+-- (1) Retrieve all users (GET)
+create function list_users(out text, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
+$$
+  select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active, role
+  from "User";
+$$
+  language 'sql';
+
+
+-- (2) Get a certain user (GET)
+create function get_user(in par_user_id text, out text, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
+$$
+  select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active, role
+  from "User"
+  where  user_id = par_user_id;
+$$
+  language 'sql';
+  
+
+-- (3) Add a new user (POST)
+create function add_user(par_user_id text, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+$body$
+  begin
+    insert into "User" values (par_id_number, par_fname, par_lname, par_minitial, par_email, par_user_location, par_user_contact, par_passw, True, par_role);
+  end
+$body$
+  language 'plpgsql';
+
+
+-- (4) Update a certain user (UPDATE)
+create function update_user(par_user_id text, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+$$
+  update "User"
+  set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_passw, role=par_role
+  where  user_id = par_user_id;
+$$
+  language 'sql';
+
+
+-- (5) Update a certain user by email(UPDATE)
+create function update_user_email(par_user_id text, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+$$
+  update "User"
+  set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_passw, role=par_role
+  where  email = par_email;
+$$
+  language 'sql';
