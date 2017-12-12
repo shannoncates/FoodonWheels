@@ -1,7 +1,7 @@
 
 create table "User"
 (
-  user_id text primary key,
+  user_id int primary key,
   fname text,
   lname text,
   minitial text,
@@ -13,11 +13,9 @@ create table "User"
   role text
 );
 
-create table ""
-
 create table "Restaurant"
 (
-   restaurant_id text primary key,
+   restaurant_id int primary key,
    restaurant_name text,
    restaurant_contact text,
    restaurant_email text,
@@ -27,7 +25,7 @@ create table "Restaurant"
 
 create table "Food"
 (
-   food_id text primary key,
+   food_id int primary key,
    restaurant_id text references "Restaurant",
    food_name text,
    food_cost text,
@@ -35,16 +33,9 @@ create table "Food"
    is_active boolean default True
 )
 
-create table "Categories"
-(
-  category_id text primary key,
-  category_name text,
-  is_active boolean default True
-);
-
 create table "Feedbackr"
 (
-  feedbackr_id text primary key,
+  feedbackr_id int primary key,
   restaurant_id text references "Restaurant",
   user_id text references "User",
   body text,
@@ -54,7 +45,7 @@ create table "Feedbackr"
 
 create table "Feedbackf"
 (
-  feedbackf_id text primary key,
+  feedbackf_id int primary key,
   food_id text references "Food",
   user_id text references "User",
   body text,
@@ -82,7 +73,7 @@ create table "Foodpicture"
 
 create table "Menuorder"
 (
-  menuorder_id text primary key,
+  menuorder_id int primary key,
   food_id text references "Food"
   restaurant_id text references "Restaurant"
   quantity int
@@ -90,7 +81,7 @@ create table "Menuorder"
 
 create table "Orders"
 (
-  order_id text primary key,
+  order_id int primary key,
   user_id text references "User",
   menuorder_id references "Menuorder",
   is_active boolean default False
@@ -98,7 +89,7 @@ create table "Orders"
 
 create table "Foodtransaction"
 (
-  foodtrans_id text primary key,
+  foodtrans_id int primary key,
   order_id text references "Orders"
   foodtrans_date timestamp,
   total real,
@@ -191,7 +182,7 @@ $$
 
 
 -- (1) Retrieve all users (GET)
-create function list_users(out text, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
+create function list_users(out int, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
 $$
   select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active, role
   from "User";
@@ -200,7 +191,7 @@ $$
 
 
 -- (2) Get a certain user (GET)
-create function get_user(in par_user_id text, out text, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
+create function get_user(in par_user_id int, out text, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
 $$
   select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active, role
   from "User"
@@ -210,7 +201,7 @@ $$
   
 
 -- (3) Add a new user (POST)
-create function add_user(par_user_id text, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+create function add_user(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
 $body$
   begin
     insert into "User" values (par_id_number, par_fname, par_lname, par_minitial, par_email, par_user_location, par_user_contact, par_passw, True, par_role);
@@ -220,7 +211,7 @@ $body$
 
 
 -- (4) Update a certain user (UPDATE)
-create function update_user(par_user_id text, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+create function update_user(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
 $$
   update "User"
   set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_passw, role=par_role
@@ -230,10 +221,21 @@ $$
 
 
 -- (5) Update a certain user by email(UPDATE)
-create function update_user_email(par_user_id text, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+create function update_user_email(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
 $$
   update "User"
   set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_passw, role=par_role
   where  email = par_email;
+$$
+  language 'sql';
+
+  --------------------------------------------------------------------------------------------------------------------
+
+-- (1) Retrieve all restaurant where is_active = True (GET)
+create function list_restaurants(out int, out text, out text, out text, out text, out boolean) returns setof record as
+$$
+  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
+  from "Restaurant"
+  where is_active = True;
 $$
   language 'sql';
