@@ -338,3 +338,125 @@ $$
   where food_id = par_food_id;
 $$
   language 'sql';
+
+  --------------------------------------------------------------------------------------------------------------------
+
+-- (1) Retrieve all feedback of a particular restaurant (GET)
+create function list_feedbackr_by_restaurant(in par_restaurant_id int, out feedbackr_id int, out restaurant_id int, out user_id text, out body text, out date_published timestamp) returns setof record as
+$$
+  select feedbackr_id, restaurant_id, user_id, body, date_published
+  from "Feedbackr"
+  where restaurant_id = par_restaurant_id and is_active = True;
+$$
+  language 'sql';  
+
+
+-- (2) Retrieve all restaurant feedback on the database (GET)
+create function list_feedbackr_database(out int, out int, out text, out text, out timestamp, out boolean) returns setof record as
+$$
+  select feedbackr_id, restaurant_id, user_id, body, date_published, is_active
+  from "Feedbackr";
+$$
+  language 'sql'; 
+
+
+-- (3) Retrieve all active feedbacks (GET)
+create function list_feedbackr(out int, out int, out text, out text, out timestamp, out boolean) returns setof record as
+$$
+  select feedbackr_id, restaurant_id, user_id, body, date_published, is_active
+  from "Feedbackr"
+  where is_active = True;
+$$
+  language 'sql'; 
+
+
+-- (4) Add a new feedback on a particular restaurant (POST)
+create function add_feedbackr(par_feedbackr_id int, par_restaurant_id int, par_user_id text, par_body text) returns void as
+$body$
+  begin
+    insert into "Feedbackr" values (par_feedbackr_id, par_restaurant_id, par_user_id, par_body, current_timestamp);
+  end
+$body$
+  language 'plpgsql';
+
+
+-- (5) Update (edit) an existing feedback (PUT) (You can only alter the body)
+-- The timestamp will be modified also
+create function edit_feedbackr(in par_feedbackr_id int, in par_body text) returns void as
+$$
+  update "Feedbackr"
+  set body = par_body, date_published = current_timestamp
+  where feedbackr_id = par_feedbackr_id;
+$$
+  language 'sql';
+
+ 
+-- (6) Remove a feedback (PUT) (Set is_active = False)
+create function delete_feedbackr(in par_feedbackr_id int) returns void as
+$$
+  update "Feedbackr"
+  set is_active = False
+  where feedbackr_id = par_feedbackr_id;
+$$
+  language 'sql';
+
+  --------------------------------------------------------------------------------------------------------------------
+
+-- (1) Retrieve all feedback of a particular food (GET)
+create function list_feedbackf_by_food(in par_food_id int, out feedbackf_id int, out restaurant_id int, out user_id text, out body text, out date_published timestamp) returns setof record as
+$$
+  select feedbackf_id, food_id, user_id, body, date_published
+  from "Feedbackr"
+  where food_id = par_food_id and is_active = True;
+$$
+  language 'sql';  
+
+
+-- (2) Retrieve all restaurant feedback on the database (GET)
+create function list_feedbackf_database(out int, out int, out text, out text, out timestamp, out boolean) returns setof record as
+$$
+  select feedbackf_id, restaurant_id, user_id, body, date_published, is_active
+  from "Feedbackf";
+$$
+  language 'sql'; 
+
+
+-- (3) Retrieve all active feedbacks (GET)
+create function list_feedbackf(out int, out int, out text, out text, out timestamp, out boolean) returns setof record as
+$$
+  select feedbackf_id, food_id, user_id, body, date_published, is_active
+  from "Feedbackf"
+  where is_active = True;
+$$
+  language 'sql'; 
+
+
+-- (4) Add a new feedback on a particular restaurant (POST)
+create function add_feedbackf(par_feedbackf_id int, par_food_id int, par_user_id text, par_body text) returns void as
+$body$
+  begin
+    insert into "Feedbackf" values (par_feedbackf_id, par_food_id, par_user_id, par_body, current_timestamp);
+  end
+$body$
+  language 'plpgsql';
+
+
+-- (5) Update (edit) an existing feedback (PUT) (You can only alter the body)
+-- The timestamp will be modified also
+create function edit_feedbackf(in par_feedbackf_id int, in par_body text) returns void as
+$$
+  update "Feedbackf"
+  set body = par_body, date_published = current_timestamp
+  where feedbackf_id = par_feedbackf_id;
+$$
+  language 'sql';
+
+ 
+-- (6) Remove a feedback (PUT) (Set is_active = False)
+create function delete_feedbackf(in par_feedbackf_id int) returns void as
+$$
+  update "Feedbackf"
+  set is_active = False
+  where feedbackf_id = par_feedbackf_id;
+$$
+  language 'sql';
