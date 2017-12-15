@@ -537,3 +537,33 @@ $$
 
 
  --------------------------------------------------------------------------------------------------------------------
+
+ 
+-- (1) Add transaction
+
+create function add_transaction(par_foodtrans_id int, par_order_id int, par_total real) returns setof record as
+$body$
+  begin
+    insert into "Foodtransaction" values (par_foodtrans_id, par_order_id, current_timestamp, par_total, True);
+  end
+$body$
+  language 'plpgsql';
+
+-- (2) Delete a transaction
+-- This function only sets the is_active = False
+create function delete_transaction(in par_foodtrans_id int) returns void as
+$$
+  update "Foodtransaction"
+  set is_active = False
+  where foodtrans_id = par_foodtrans_id;
+$$
+  language 'sql';
+
+-- (3) Retrieve the transaction which matches the order id parameter (GET)
+create function show_transaction_by_id(in par_foodtrans_id int, out int, out int, out real) returns setof record as
+$$
+  select foodtrans_id, order_id, total      
+  from "Foodtransaction"
+  where is_active = True and foodtrans_id = par_foodtrans_id;
+$$
+  language 'sql';
