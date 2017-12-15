@@ -20,6 +20,7 @@ create table "Restaurant"
    restaurant_contact text,
    restaurant_email text,
    restaurant_address text,
+   restaurant_description text,
    is_active boolean default True
 );
 
@@ -74,23 +75,24 @@ create table "Foodpicture"
 create table "Menuorder"
 (
   menuorder_id int primary key,
-  food_id text references "Food"
-  restaurant_id text references "Restaurant"
-  quantity int
+  food_id text references "Food",
+  restaurant_id text references "Restaurant",
+  quantity int,
+  is_active boolean default True
 );
 
 create table "Orders"
 (
   order_id int primary key,
-  user_id text references "User",
-  menuorder_id references "Menuorder",
-  is_active boolean default False
+  user_id int references "User",
+  menuorder_id int references "Menuorder",
+  is_active boolean default True
 );
 
 create table "Foodtransaction"
 (
   foodtrans_id int primary key,
-  order_id text references "Orders"
+  order_id int references "Orders"
   foodtrans_date timestamp,
   total real,
   is_paid boolean default False
@@ -232,45 +234,45 @@ $$
   --------------------------------------------------------------------------------------------------------------------
 
 -- (1) Retrieve all restaurant where is_active = True (GET)
-create function list_restaurant(out int, out text, out text, out text, out text, out boolean) returns setof record as
+create function list_restaurant(out int, out text, out text, out text, out text, out text, out boolean) returns setof record as
 $$
-  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
+  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, restaurant_description, is_active
   from "Restaurant"
   where is_active = True;
 $$
   language 'sql';
 
 -- (2) Retrieve all restaurant in the DATABASE (GET)
-create function list_restaurant_database(out int, out text, out text, out text, out text, out boolean) returns setof record as
+create function list_restaurant_database(out int, out text, out text, out text, out text, out text, out boolean) returns setof record as
 $$
-  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
+  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, restaurant_description, is_active
   from "Restaurant"
 $$
   language 'sql';
 
   -- (3) Retrieve the restaurant with a certain starting with a certain string (GET)
-create function get_restaurant_starting_with(in par_keyword text, out int, out text, out text, out text, out text, out boolean) returns setof record as
+create function get_restaurant_starting_with(in par_keyword text, out int, out text, out text, out text, out text, out text, out boolean) returns setof record as
 $$
-  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, is_active
+  select restaurant_id, restaurant_name, restaurant_contact, restaurant_email, restaurant_address, restaurant_description, is_active
   from "Restaurant"
   where lower(restaurant_name) Like par_keyword;
 $$
   language 'sql';
 
    -- (4) Add restaurant (POST)
-create function add_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text) returns setof record as
+create function add_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text, par_restaurant_description text) returns setof record as
 $body$
   begin
-    insert into "Restaurant" values (par_restaurant_id, par_restaurant_name, par_restaurant_contact, par_restaurant_email, par_restaurant_address, True);
+    insert into "Restaurant" values (par_restaurant_id, par_restaurant_name, par_restaurant_contact, par_restaurant_email, par_restaurant_address, par_restaurant_description, True);
   end
 $body$
   language 'sql';
 
 -- (5) Update restaurant (UPDATE)
-create function update_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text) returns setof record as
+create function update_restaurant(par_restaurant_id int, par_restaurant_name text, par_restaurant_contact text, par_restaurant_email text, par_restaurant_address text, par_restaurant_description text) returns setof record as
 $$
   update "Restaurant"
-  set restaurant_name = par_restaurant_name, restaurant_contact = par_restaurant_contact, restaurant_email = par_restaurant_email, restaurant_address = par_restaurant_address, is_active = True
+  set restaurant_name = par_restaurant_name, restaurant_contact = par_restaurant_contact, restaurant_email = par_restaurant_email, restaurant_address = par_restaurant_address, restaurant_description = par_restaurant_description, is_active = True
   where restaurant_id = par_restaurant_id;
 $$
   language 'sql';
@@ -283,6 +285,7 @@ $$
   where restaurant_id = par_restaurant_id;
 $$
   language 'sql';
+
 
   --------------------------------------------------------------------------------------------------------------------
 
@@ -460,3 +463,25 @@ $$
   where feedbackf_id = par_feedbackf_id;
 $$
   language 'sql';
+
+  --------------------------------------------------------------------------------------------------------------------
+
+  -- (1) Retrieve all menuorder (GET)
+  create function show_menuorder(out int, out text, out text, out int) returns setof record as
+  $$
+    select menuorder_id, food_id, restaurant_id, quantity
+    from "Menuorder"
+    where is_active = True;
+  $$
+    language 'sql';
+
+--(2) Retrieve the menuorder which matches the menuorder id parameter (GET)
+create function show_menuorder_by_id(in par_menuorder_id int, out int, out text, out text, out int) returns setof record as
+$$
+  select menuorder_id, food_id, restaurant_id, quantity
+  from "Menuorder"
+  where is_active = True and menuorder_id = par_menuorder_id;
+$$
+  language 'sql';
+
+ 
