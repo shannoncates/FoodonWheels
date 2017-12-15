@@ -484,4 +484,56 @@ $$
 $$
   language 'sql';
 
+ --------------------------------------------------------------------------------------------------------------------
+
+  -- (1) Retrieve all order (GET)
+create function show_order(out int, out int, out int) returns setof record as
+$$
+  select order_id, user_id, menuorder_id
+  from "Orders"
+  where is_active = True;
+$$
+  language 'sql';
+
+
+--(2) Retrieve the order which matches the order id parameter (GET)
+create function show_order_by_id(in par_order_id int, out int, out int, out int) returns setof record as
+$$
+  select order_id, user_id, menuorder_id
+  from "Orders"
+  where is_active = True and order_id = par_order_id;
+$$
+  language 'sql';
+
+-- (3) Add a new order (POST)
+create function add_order(par_order_id int, par_user_id int, par_menuorder_id int) returns void as
+$body$
+  begin
+    insert into "Orders" values (par_order_id, par_user_id, par_menuorder_id, True);
+  end
+$body$
+  language 'plpgsql';
+
+
+-- (5) Update food (UPDATE)
+create function update_food(par_order_id int, par_user_id int, par_menuorder_id int) returns setof record as
+$$
+  update "Food"
+  set user_id = par_user_id, menuorder_id = menuorder, is_active = True
+  where order_id = par_order_id;
+$$
+  language 'sql';
+
+
  
+-- (6) Remove order (PUT) (Set is_active = False)
+create function delete_order(in par_order_id int) returns void as
+$$
+  update "Orders"
+  set is_active = False
+  where order_id = par_order_id;
+$$
+  language 'sql';
+
+
+ --------------------------------------------------------------------------------------------------------------------
