@@ -7,10 +7,12 @@ import os
 class User(db.Model):
     """ The user model """
     
-    first_name = db.Column(db.String(30), primary_key=True)
-    last_name = db.Column(db.String(30))
-    middle_initial = db.Column(db.String(1))
+    fname = db.Column(db.String(30), primary_key=True)
+    lname = db.Column(db.String(30))
+    minitial = db.Column(db.String(1))
     email = db.Column(db.String(120), unique=True)
+    user_location = db.Column(db.String(30))
+    user_contact = db.Column(db.String(30))
     password = db.Column(db.String(30))
 
     def is_authenticated(self):
@@ -22,15 +24,17 @@ class User(db.Model):
     def is_anonymous(self):
         return False
 
-    def __init__(self, first_name, last_name, middle_initial, email, password):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.middle_initial = middle_initial
+    def __init__(self, fname, lname, minitial, email, user_location, user_contact, password):
+        self.fname = fname
+        self.lname = lname
+        self.minitial = minitial
         self.email = email
+        self.user_location = user_location
+        self.user_contact = user_contact
         self.password = password
 
     def __repr__(self):
-        return self.first_name + " " + self.middle_initial + " " + self.last_name
+        return self.fname + " " + self.minitial + " " + self.lname
 
     
     
