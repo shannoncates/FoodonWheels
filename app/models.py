@@ -7,7 +7,7 @@ import os
 class User(db.Model):
     """ The user model """
     
-    fname = db.Column(db.String(30), primary_key=True)
+    fname = db.Column(db.String(30))
     lname = db.Column(db.String(30))
     minitial = db.Column(db.String(1))
     email = db.Column(db.String(120), unique=True)
@@ -15,14 +15,8 @@ class User(db.Model):
     user_contact = db.Column(db.String(30))
     password = db.Column(db.String(30))
 
-    def is_authenticated(self):
-        return True
-
     def is_active(self):
         return True
-
-    def is_anonymous(self):
-        return False
 
     def __init__(self, fname, lname, minitial, email, user_location, user_contact, password):
         self.fname = fname
