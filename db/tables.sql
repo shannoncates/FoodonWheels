@@ -9,8 +9,7 @@ create table "User"
   user_location text,
   user_contact text,
   password text,
-  is_active boolean default True,
-  role text
+  is_active boolean default True
 );
 
 create table "Restaurant"
@@ -184,18 +183,18 @@ $$
 
 
 -- (1) Retrieve all users (GET)
-create function list_users(out int, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
+create function list_users(out int, out text, out text, out text, out text, out text, out text, out text, out boolean) returns setof record as
 $$
-  select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active, role
+  select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active
   from "User";
 $$
   language 'sql';
 
 
 -- (2) Get a certain user (GET)
-create function get_user(in par_user_id int, out text, out text, out text, out text, out text, out text, out text, out text, out boolean, out text) returns setof record as
+create function get_user(in par_user_id int, out text, out text, out text, out text, out text, out text, out text, out text, out boolean) returns setof record as
 $$
-  select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active, role
+  select user_id, fname, lname, minitial, email, user_location, user_contact, password, is_active
   from "User"
   where  user_id = par_user_id;
 $$
@@ -203,30 +202,30 @@ $$
   
 
 -- (3) Add a new user (POST)
-create function add_user(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+create function add_user(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_password text) returns void as
 $body$
   begin
-    insert into "User" values (par_id_number, par_fname, par_lname, par_minitial, par_email, par_user_location, par_user_contact, par_passw, True, par_role);
+    insert into "User" values (par_user_id, par_fname, par_lname, par_minitial, par_email, par_user_location, par_user_contact, par_password, True);
   end
 $body$
   language 'plpgsql';
 
 
 -- (4) Update a certain user (UPDATE)
-create function update_user(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+create function update_user(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_password text) returns void as
 $$
   update "User"
-  set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_passw, role=par_role
+  set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_password
   where  user_id = par_user_id;
 $$
   language 'sql';
 
 
 -- (5) Update a certain user by email(UPDATE)
-create function update_user_email(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_passw text, par_role text) returns void as
+create function update_user_email(par_user_id int, par_fname text, par_lname text, par_minitial text, par_email text, par_user_location text, par_user_contact text, par_password text) returns void as
 $$
   update "User"
-  set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_passw, role=par_role
+  set fname = par_fname, lname = par_lname, minitial = par_minitial, email = par_email, user_location = par_user_location, user_contact, par_user_contact, password = par_password
   where  email = par_email;
 $$
   language 'sql';
