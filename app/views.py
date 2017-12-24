@@ -1,18 +1,11 @@
 from flask import Flask, send_file, render_template, send_from_directory, jsonify
-from flask_httpauth import HTTPBasicAuth
 from app import app
-from models import DBconn
-from sqlalchemy import create_engine
-from flask import url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import Form
-import hashlib
 import sys, os
 
-
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-key = "1290gath43quz1@"
-auth = HTTPBasicAuth()
+
+
+######### DATABASE CONNECTION #####################
 
 def spcall(qry, param, commit=False):
     """ Function which communicates with the database """
@@ -30,6 +23,7 @@ def spcall(qry, param, commit=False):
                + str(sys.exc_info()[1]), )]
     return res
 
+###################################################
 
 @app.route('/', methods=['GET'])
 @app.route('/home', methods=['GET'])
@@ -38,15 +32,6 @@ def home():
 
     return send_from_directory(os.path.join(APP_ROOT, 'static', 'html'), 'index.html')
 
-
-#def verify_token(token):
-
-#    recs = spcall('list_users', ())
-
-#    for element in recs:
-#        if token == hashlib.md5( str(element[4] + element[7] ). encode()).hexdigest(): #email + password 
-#            return True
-#        return False
     
 
 @app.errorhandler(404)
@@ -71,17 +56,9 @@ def index():
 @app.route('/api/registeruser', methods=['POST'])
 def register():
 
-    user_id = len(spcall("list_users", ())) + 1
-    fname = request.form["fname"]
-    lname = request.form["lname"]
-    minitial = request.form["minitial"]
-    email = request.form["email"]
-    user_location = request.form["user_location"]
-    user_contact = request.form["user_contact"]
-	password = request.form["password"]
-	password = password + key
-	password = hashlib.md5(password.encode())
-    password = password.hexdigest()
+	passw = request.form["password"]
+	passw = passw + key
+	passw = hashlib.md5(passw.encode())
 	email = request.form["email"]
 
 	if email == '':
@@ -107,24 +84,22 @@ def register():
 	if 'Error' in str(recs[0][0]):
 		return jsonify({'status': 'error', 'message': recs[0][0]})
 	for element in recs:
-		if email == str(element[4]):
-			return jsonify({'status': 'error', 'message': 'email already exists'})
+		if email == str(element[0]):
+			return jsonify({'status': 'error2', 'message': 'email already exists'})
 
-    res = spcall("add_user", (user_id, fname, lname, minitial, email, user_location, user_contact, password), True)
-    return jsonify({"status: "200", "message": "success"})
-	#res = spcall('add_user', (
-	#	request.form["email"],
-	#	request.form["firstname"],
-	#	request.form["middlei"],
-	#	request.form["lastname"],
-	#	request.form["contactno"],
-	#	request.form["address"],
-	#	passw
-	#	), True)
+	res = spcall('add_user', (
+		request.form["email"],
+		request.form["firstname"],
+		request.form["middlei"],
+		request.form["lastname"],
+		request.form["contactno"],
+		request.form["address"],
+		passw
+		), True)
 
-	#if 'Error' in str(res[0][0]):
-	#	return jsonify({'status': 'error', 'message': res[0][0]})
-	#return jsonify({'status': 'ok', 'message': res[0][0]})
+	if 'Error' in str(res[0][0]):
+		return jsonify({'status': 'error', 'message': res[0][0]})
+	return jsonify({'status': 'ok', 'message': res[0][0]})
 
 @app.route('/api/loginuser', methods=['POST'])
 def login():
@@ -159,7 +134,245 @@ def login():
         return jsonify({'status': 'error', 'message': 'password or email is incorrect'})
 
 
+@auth.login_required
 @app.route('/api/logout')
 def logout():
     """ User logout function """
     return jsonify({'status':'ok','message':'logged out'})
+
+
+########### LISTS #####################
+    
+    # List all user_id numbers
+    users = spcall('list_users', ())
+    user_id_list = []
+    for user in users:
+        user_id_list.append(user[0])
+        
+    # List all restaurant_id numbers
+    restaurants = spcall('list_restaurants', ())
+    restaurant_id_list = []
+    for restaurant in restaurants:
+        restaurant_id_list.append(restaurant[0])
+
+    # List all food_id numbers
+    foods = spcall('list_foods', ())
+    food_id_list = []
+    for food in foods:
+        food_id_list.append(food[0])
+
+################# FOOD #####################
+
+@auth.login_required
+def get_restaurant():
+	""" Retrieves all restaurants in the database with is_active = True """
+
+	restaurant_list = spcall('list_restaurants', ())
+		
+	if (len(restaurant_list) == 0):
+		return jsonify({'status': 'successful', 'message': 'empty'})
+		
+	else:
+		recs = []
+		for i in restaurant_list:
+			recs.append({'restaurant_id': i[0], 
+                         'user_id_number': i[1], 
+                         'restaurant_name': i[2], 
+                         'restaurant_contact': i[3],
+                         'restaurant_email': i[4],
+                         'restaurant_address': i[5],
+                         'restaurant_description': i[6]})
+            
+		return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
+
+
+@auth.login_required
+def get_food():
+	""" Retrieves all foods in the database with is_active = True """
+
+	food_list = spcall('list_foods', ())
+		
+	if (len(food_list) == 0):
+		return jsonify({'status': 'successful', 'message': 'empty'})
+		
+	else:
+		recs = []
+		for i in food_list:
+			recs.append({'food_id': i[0], 
+                         'user_id_number': i[1],
+                         'restaurant_id_number': i[2], 
+                         'food_name': i[3], 
+                         'food_cost': i[4],
+                         'food_description': i[5]})
+            
+		return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
+
+
+###################### USER #########################
+
+@auth.login_required
+@app.route('/api/user', methods=['GET'])
+def get_users():
+    """ Retrieves all users stored in the database """
+
+    res = spcall('list_users', ())
+    if 'Error' in str(res[0][0]):
+        return jsonify({'status': 'error', 'message': res[0][0]})
+
+    recs = []
+    for r in res:
+        recs.append({'user_id': r[0], 'fname': r[1], 'lname': r[2], 'minitial': r[3], 'email': r[4], 'user_location': r[4], 'user_contact': r[5], 'password': r[6], 'is_active': r[7], 'is_anonymous': r[8], 'role': r[9]})
+    return jsonify({'status': 'ok', 'entries': recs, 'count': len(recs)})
+
+#####################################################
+
+
+
+
+######################################   FEEDBACK   ########################################
+
+
+@auth.login_required
+def add_feedback():
+    """ Add a new feedback """
+
+    if ((request.form["body"] == '') or (request.form["user_id"] == '') or (request.form["restaurant_id"] == '')):
+        return jsonify({'status': 'error', 'message': 'Incomplete submission'})
+
+    else:
+		body = request.form["body"]
+		user_id = request.form["user_id"]
+		restaurant_id = int(request.form["restaurant_id"])
+
+		# List all restaurant id
+		restaurants = spcall('list_restaurants', ())
+		restaurant_id_list = []
+		for restaurant in restaurants:
+			restaurant_id_list.append(restaurant[0])
+    
+		# List all id numbers
+		users = spcall('list_users', ())
+		user_id_list = []
+		for user in users:
+			user_id_list.append(user[0])
+
+		valid_user_id = False
+		valid_restaurant_id = False
+
+		# Validate restaurant id
+		for entry in restaurant_id_list:
+			if (entry == restaurant_id):
+				valid_restaurant_id = True
+
+		# Validate user id
+		for entry in user_id_list:
+			if (entry == user_id):
+				valid_user_id = True
+
+		if (valid_user_id and valid_restaurant_id):
+			feedback_id = len(spcall('list_feedback_database', ())) + 1
+			res = spcall('add_feedback', (feedback_id, restaurant_id, user_id, body), True)
+		
+			return jsonify({'status': 'successful', 'message': 'feedback successfully added'})
+
+		else:
+			return jsonify({'status': 'error', 'message': 'an error was encountered'})
+
+
+@auth.login_required
+def get_feedback_by_restaurant(restaurant_id):
+	""" Retrieve all feedback of a particular restaurant """
+
+	# List all restaurant id
+	restaurant_list = spcall('list_restaurants', ())
+	active_restaurant_ids = []
+	for restaurant in restaurant_list:
+		active_restaurant_ids.append(restaurant[0])
+        
+	valid_restaurant_id = False
+    
+	# Validate restaurant id
+	for entry in active_restaurant_ids:
+		if (entry == restaurant_id):
+			valid_restaurant_id = True
+	
+	if (valid_restaurant_id):
+		res = spcall('list_feedback_by_restaurant', str(restaurant_id))
+		if (len(res) == 0):
+			return jsonify({'status': 'successful', 'message': 'empty'})
+		else:
+			recs = []
+			for i in res:
+				recs.append({'feedback_id': str(i[0]), 'restaurant_id': str(i[1]), 'user_id': i[2], 'body': i[3], 'date_published': i[4]})
+			return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
+			
+	else:
+		return jsonify({'status': 'error', 'message': 'an error was encountered'})
+
+
+@auth.login_required
+def edit_feedback(restaurant_id, feedback_id):
+	""" Edit a particular feedback """
+
+	if ((request.form["body"] == '') or (request.form["user_id"] == '')):
+		return jsonify({'status': 'error', 'message': 'Incomplete submission'})
+
+	else:
+		# List all restaurant id
+		restaurant_list = spcall('list_restaurants', ())
+		active_restaurant_ids = []
+		for restaurant in restaurant_list:
+			active_restaurant_ids.append(restaurant[0])
+
+		# List all feedback id
+		feedback_list = spcall('list_feedback', ())
+		active_feedback_ids = []
+		for feedback in feedback_list:
+			active_feedback_ids.append(feedback[0]) 
+
+		valid_restaurant_id = False
+		valid_feedback_id = False
+
+		# Validate restaurant id
+		for entry in active_restaurant_ids:
+			if (entry == restaurant_id):
+				valid_restaurant_id = True
+
+		# Validate feedback id
+		for entry in active_feedback_ids:
+			if (entry == feedback_id):
+				valid_feedback_id = True
+    
+		if (valid_restaurant_id and valid_feedback_id):
+			res = spcall('edit_feedback', (feedback_id, request.form["body"]), True)
+			return jsonify({'status': 'successful', 'message': 'feedback successfully updated'})
+	
+		else:
+			return jsonify({'status': 'error', 'message': 'an error was encountered'})
+
+
+@auth.login_required
+def delete_feedback(feedback_id):
+	""" Delete a feedback """
+	
+	# List all feedback id
+	feedback_list = spcall('list_feedback', ())
+	active_feedback_ids = []
+	for feedback in feedback_list:
+		active_feedback_ids.append(feedback[0])  
+
+	valid_feedback_id = False
+
+	# Validate feedback id
+	for entry in active_feedback_ids:
+		if (entry == feedback_id):
+			valid_feedback_id = True
+
+	if (valid_feedback_id):
+		res = spcall('delete_feedback', str(feedback_id), True)
+		return jsonify({'status': 'successful', 'message': 'feedback successfully removed'})
+
+	return jsonify({'status': 'error', 'message': 'an error was encountered'})
+
+
+############################################################################################
