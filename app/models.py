@@ -1,34 +1,34 @@
 from sqlalchemy import create_engine
-from app import db
+#from app import db
 import os
 
 
 
-class User(db.Model):
-    """ The user model """
+#class User(db.Model):
+#    """ The user model """
     
-    fname = db.Column(db.String(30))
-    lname = db.Column(db.String(30))
-    minitial = db.Column(db.String(1))
-    email = db.Column(db.String(120), unique=True)
-    user_location = db.Column(db.String(30))
-    user_contact = db.Column(db.String(30))
-    password = db.Column(db.String(30))
+#    fname = db.Column(db.String(30))
+#    lname = db.Column(db.String(30))
+#    minitial = db.Column(db.String(1))
+#    email = db.Column(db.String(120), unique=True)
+#    user_location = db.Column(db.String(30))
+#    user_contact = db.Column(db.String(30))
+#    password = db.Column(db.String(30))
 
-    def is_active(self):
-        return True
+#    def is_active(self):
+#        return True
 
-    def __init__(self, fname, lname, minitial, email, user_location, user_contact, password):
-        self.fname = fname
-        self.lname = lname
-        self.minitial = minitial
-        self.email = email
-        self.user_location = user_location
-        self.user_contact = user_contact
-        self.password = password
+#    def __init__(self, fname, lname, minitial, email, user_location, user_contact, password):
+#        self.fname = fname
+#        self.lname = lname
+#        self.minitial = minitial
+#        self.email = email
+#        self.user_location = user_location
+#        self.user_contact = user_contact
+#        self.password = password
 
-    def __repr__(self):
-        return self.fname + " " + self.minitial + " " + self.lname
+#    def __repr__(self):
+#        return self.fname + " " + self.minitial + " " + self.lname
 
     
     
