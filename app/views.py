@@ -512,7 +512,7 @@ def upload_restaurant_picture(idnumber):
     res = spcall('updaterestaurantpicture', (idnumber, destination), True)
     print (destination)
 
-    return jsonify({'status': 'success', 'message': 'Profile Picture Uploaded Successfully'})
+    return jsonify({'status': 'success', 'message': 'Restaurant Picture Uploaded Successfully'})
 
 
 #####################################################################################
@@ -576,7 +576,7 @@ def upload_food_picture(idnumber):
     res = spcall('updatefoodpicture', (idnumber, destination), True)
     print (destination)
 
-    return jsonify({'status': 'success', 'message': 'Profile Picture Uploaded Successfully'})
+    return jsonify({'status': 'success', 'message': 'Food Picture Uploaded Successfully'})
 
 
 #####################################################################################
