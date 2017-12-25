@@ -179,7 +179,7 @@ def logout():
 def get_restaurant():
 	""" Retrieves all restaurants in the database with is_active = True """
 
-	restaurant_list = spcall('list_restaurants', ())
+	restaurant_list = spcall('list_restaurant', ())
 		
 	if (len(restaurant_list) == 0):
 		return jsonify({'status': 'successful', 'message': 'empty'})
@@ -197,12 +197,39 @@ def get_restaurant():
             
 		return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
 
+@auth.login_required
+@app.route('/api/restaurant/<int:restaurant_id>', methods=['PUT'])
+def delete_restaurant(restaurant_id):
+	""" Delete a restaurant """
+	
+	# List all restaurant id
+	restaurant_list = spcall('list_restaurant', ())
+	active_restaurant_ids = []
+	for restaurant in restaurant_list:
+		active_restaurant_ids.append(restaurant[0])  
+
+	valid_restaurant_id = False
+
+	# Validate restaurant id
+	for entry in active_restaurant_ids:
+		if (entry == restaurant_id):
+			valid_restaurant_id = True
+
+	if (valid_restaurant_id):
+		res = spcall('delete_restaurant', str(restaurant_id), True)
+		return jsonify({'status': 'successful', 'message': 'restaurant successfully removed'})
+
+	return jsonify({'status': 'error', 'message': 'an error was encountered'})
+
+
+############################################################################################
+
 
 @auth.login_required
 def get_food():
 	""" Retrieves all foods in the database with is_active = True """
 
-	food_list = spcall('list_foods', ())
+	food_list = spcall('list_food', ())
 		
 	if (len(food_list) == 0):
 		return jsonify({'status': 'successful', 'message': 'empty'})
@@ -218,6 +245,33 @@ def get_food():
                          'food_description': i[5]})
             
 		return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
+
+@auth.login_required
+@app.route('/api/food/<int:food_id>', methods=['PUT'])
+def delete_food(food_id):
+	""" Delete a food """
+	
+	# List all food id
+	food_list = spcall('list_food', ())
+	active_food_ids = []
+	for food in food_list:
+		active_food_ids.append(food[0])  
+
+	valid_food_id = False
+
+	# Validate food id
+	for entry in active_food_ids:
+		if (entry == food_id):
+			valid_food_id = True
+
+	if (valid_food_id):
+		res = spcall('delete_food', str(food_id), True)
+		return jsonify({'status': 'successful', 'message': 'food successfully removed'})
+
+	return jsonify({'status': 'error', 'message': 'an error was encountered'})
+
+
+############################################################################################
 
 
 ###################### USER #########################
