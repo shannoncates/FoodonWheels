@@ -1,6 +1,11 @@
-from flask import Flask, send_file, render_template, send_from_directory, jsonify
+from flask import Flask, send_file, render_template, send_from_directory, jsonify, request, url_for
 from app import app
-import sys, os
+from sqalchemy import create_engine
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import form
+from models import DBconn
+import hashlib
+import sys
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -56,10 +61,17 @@ def index():
 @app.route('/api/registeruser', methods=['POST'])
 def register():
 
-	passw = request.form["password"]
-	passw = passw + key
-	passw = hashlib.md5(passw.encode())
-	email = request.form["email"]
+	user_id = len(spcall("list_users", ())) + 1
+    fname = request.form["fname"]
+    lname = request.form["lname"]
+    minitial = request.form["minitial"]
+    email = request.form["email"]
+    user_location = request.form["user_location"]
+    user_contact = request.form["user_contact"]
+ 	password = request.form["password"]
+ 	password = password + key
+    password = hashlib.md5(password.encode())
+    password = password.hexdigest()
 
 	if email == '':
 		return jsonify({'status': 'error2', 'message': 'email cannot be blank'})
@@ -376,3 +388,195 @@ def delete_feedback(feedback_id):
 
 
 ############################################################################################
+
+@auth.login_required
+@app.route('/profilepictures/<string:idnumber>', methods=['GET'])
+def get_profile_picture(idnumber):
+    """ Retrieve the filename of the current profile picture """
+
+    res = spcall('get_profilepicture', [str(idnumber)])
+    
+    for i in res:
+        filename = i[0]
+
+    return jsonify({'filename': filename})
+
+
+@auth.login_required
+@app.route('/profilepicture/<string:idnumber>', methods=['POST'])
+def upload_profile_picture(idnumber):
+    """ Upload profile picture """
+
+    ################ GET THE LATEST VERSION OF THE IMAGE ##############
+    res = spcall('get_profilepicture', [str(idnumber)])
+    rec = []
+    for i in res:
+        rec.append({'filename': i[0]})
+
+    print ("location")
+    pro = rec[0]
+    print (pro)
+    pro = str(pro)
+    print ("pro")
+    print (pro)
+    pro = pro[-3:]
+    pro = pro[0]
+    print (pro)
+    version = pro
+    version = int(version)
+    version = version + 1
+    version = str(version)
+
+    #################   UPLOAD THE NEW PHOTO   #################
+    
+    target = os.path.join(APP_ROOT, 'static/profile_pictures/')
+
+    # If the upload directory does not exist, create it:
+    if not os.path.isdir(target):
+        os.mkdir(target)
+
+    for file in request.files.getlist('photo'):
+        print (file)
+        filename = idnumber + version
+        print (filename)
+        destination = '/'.join([target, filename])
+        print (destination)
+        file.save(destination)
+
+    # Save the filename of the profile picture into the database
+    res = spcall('uploadprofilepicture', (idnumber, destination), True)
+    res = spcall('updateprofilepicture', (idnumber, destination), True)
+    print (destination)
+
+    return jsonify({'status': 'success', 'message': 'Profile Picture Uploaded Successfully'})
+
+
+#####################################################################################
+
+@auth.login_required
+@app.route('/restaurantpictures/<string:idnumber>', methods=['GET'])
+def get_restaurant_picture(idnumber):
+    """ Retrieve the filename of the current restaurant picture """
+
+    res = spcall('get_restaurantpicture', [str(idnumber)])
+    
+    for i in res:
+        filename = i[0]
+
+    return jsonify({'filename': filename})
+
+
+@auth.login_required
+@app.route('/restaurantpicture/<string:idnumber>', methods=['POST'])
+def upload_restaurant_picture(idnumber):
+    """ Upload restaurant picture """
+
+    ################ GET THE LATEST VERSION OF THE IMAGE ##############
+    res = spcall('get_restaurantpicture', [str(idnumber)])
+    rec = []
+    for i in res:
+        rec.append({'filename': i[0]})
+
+    print ("location")
+    pro = rec[0]
+    print (pro)
+    pro = str(pro)
+    print ("pro")
+    print (pro)
+    pro = pro[-3:]
+    pro = pro[0]
+    print (pro)
+    version = pro
+    version = int(version)
+    version = version + 1
+    version = str(version)
+
+    #################   UPLOAD THE NEW PHOTO   #################
+    
+    target = os.path.join(APP_ROOT, 'static/restaurant_pictures/')
+
+    # If the upload directory does not exist, create it:
+    if not os.path.isdir(target):
+        os.mkdir(target)
+
+    for file in request.files.getlist('photo'):
+        print (file)
+        filename = idnumber + version
+        print (filename)
+        destination = '/'.join([target, filename])
+        print (destination)
+        file.save(destination)
+
+    # Save the filename of the restaurant picture into the database
+    res = spcall('uploadrestaurantpicture', (idnumber, destination), True)
+    res = spcall('updaterestaurantpicture', (idnumber, destination), True)
+    print (destination)
+
+    return jsonify({'status': 'success', 'message': 'Profile Picture Uploaded Successfully'})
+
+
+#####################################################################################
+
+@auth.login_required
+@app.route('/foodpictures/<string:idnumber>', methods=['GET'])
+def get_food_picture(idnumber):
+    """ Retrieve the filename of the current food picture """
+
+    res = spcall('get_foodpicture', [str(idnumber)])
+    
+    for i in res:
+        filename = i[0]
+
+    return jsonify({'filename': filename})
+
+
+@auth.login_required
+@app.route('/foodpicture/<string:idnumber>', methods=['POST'])
+def upload_food_picture(idnumber):
+    """ Upload food picture """
+
+    ################ GET THE LATEST VERSION OF THE IMAGE ##############
+    res = spcall('get_foodpicture', [str(idnumber)])
+    rec = []
+    for i in res:
+        rec.append({'filename': i[0]})
+
+    print ("location")
+    pro = rec[0]
+    print (pro)
+    pro = str(pro)
+    print ("pro")
+    print (pro)
+    pro = pro[-3:]
+    pro = pro[0]
+    print (pro)
+    version = pro
+    version = int(version)
+    version = version + 1
+    version = str(version)
+
+    #################   UPLOAD THE NEW PHOTO   #################
+    
+    target = os.path.join(APP_ROOT, 'static/food_pictures/')
+
+    # If the upload directory does not exist, create it:
+    if not os.path.isdir(target):
+        os.mkdir(target)
+
+    for file in request.files.getlist('photo'):
+        print (file)
+        filename = idnumber + version
+        print (filename)
+        destination = '/'.join([target, filename])
+        print (destination)
+        file.save(destination)
+
+    # Save the filename of the food picture into the database
+    res = spcall('uploadfoodpicture', (idnumber, destination), True)
+    res = spcall('updatefoodpicture', (idnumber, destination), True)
+    print (destination)
+
+    return jsonify({'status': 'success', 'message': 'Profile Picture Uploaded Successfully'})
+
+
+#####################################################################################
