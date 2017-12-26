@@ -1,13 +1,11 @@
-from flask import Flask, send_file, render_template, send_from_directory, jsonify, request, url_for
+from flask import Flask, render_template, send_from_directory, jsonify, request, url_for
 from app import app
-from sqalchemy import create_engine
+from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import form
+from flask_wtf import Form
 from models import DBconn
 import hashlib
 import sys
-
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 ######### DATABASE CONNECTION #####################
@@ -29,14 +27,6 @@ def spcall(qry, param, commit=False):
     return res
 
 ###################################################
-
-@app.route('/', methods=['GET'])
-@app.route('/home', methods=['GET'])
-def home():
-    """ The homepage """
-
-    return send_from_directory(os.path.join(APP_ROOT, 'static', 'html'), 'index.html')
-
     
 
 @app.errorhandler(404)
@@ -52,29 +42,51 @@ def internal_server_error(e):
 
     return jsonify({'status': '500', 'message': 'Internal Server Error'})
 
-@app.route('/')
-@app.route('/index')
+@app.route("/", methods=["GET"])
 def index():
-	return send_file("templates/index.html")
+	return render_template("index.html")
 
+@app.route("/signin", methods=["GET"])
+def signin():
+	return render_template("signin.html")
+
+@app.route("/signup", methods=["GET"])
+def signup():
+	return render_template("signup.html")
+
+@app.route("/userprofile", methods=["GET"])
+def userprofile():
+	return render_template("userprofile.html")
+
+@app.route("/about", methods =["GET"])
+def about():
+	return render_template("about.html")
+
+@app.route("/sidebarright", methods=["GET"])
+def sidebarright():
+	return render_template("sidebar-right.html")
+
+@app.route("/sidebarleft", methods=["GET"])
+def sidebarleft():
+	return render_template("sidebar-left.html")
 
 @app.route('/api/registeruser', methods=['POST'])
 def register():
 
 	user_id = len(spcall("list_users", ())) + 1
-    fname = request.form["fname"]
-    lname = request.form["lname"]
-    minitial = request.form["minitial"]
-    email = request.form["email"]
-    user_location = request.form["user_location"]
-    user_contact = request.form["user_contact"]
+	fname = request.form["fname"]
+	lname = request.form["lname"]
+	minitial = request.form["minitial"]
+	email = request.form["email"]
+	user_location = request.form["user_location"]
+	user_contact = request.form["user_contact"]
  	password = request.form["password"]
  	password = password + key
-    password = hashlib.md5(password.encode())
-    password = password.hexdigest()
+ 	password = hashlib.md5(password.encode())
+ 	password = password.hexdigest()
 
 	if email == '':
-		return jsonify({'status': 'error2', 'message': 'email cannot be blank'})
+		return jsonify({'status': 'error', 'message': 'email cannot be blank'})
 
 	email_validity = False
 	valid_email_ending = False
@@ -88,65 +100,46 @@ def register():
 
 
 	if email_validity == False:
-		return jsonify({'status': 'error2', 'message': 'invalid email'})
-
-
+		return jsonify({'status': 'error', 'message': 'invalid email'})
 
 	recs = spcall('list_users', ())
+
 	if 'Error' in str(recs[0][0]):
 		return jsonify({'status': 'error', 'message': recs[0][0]})
 	for element in recs:
 		if email == str(element[0]):
-			return jsonify({'status': 'error2', 'message': 'email already exists'})
+			return jsonify({'status': 'error', 'message': 'email already exists'})
 
-	res = spcall('add_user', (
-		request.form["email"],
-		request.form["firstname"],
-		request.form["middlei"],
-		request.form["lastname"],
-		request.form["contactno"],
-		request.form["address"],
-		passw
-		), True)
-
-	if 'Error' in str(res[0][0]):
-		return jsonify({'status': 'error', 'message': res[0][0]})
-	return jsonify({'status': 'ok', 'message': res[0][0]})
+	res = spcall("add_user", (user_id, fname, lname, minitial, email, user_location, user_contact, password), True)
+	return jsonify({"status": "200", "message": "success"})
 
 @app.route('/api/loginuser', methods=['POST'])
 def login():
     """ User login function """
 
-    attempted_email = request.form["email"]
-    attempted_password = request.form["password"]
-    attempted_password = attempted_password + key
-    
-    attempted_password = hashlib.md5(attempted_password.encode())
-    attempted_password = attempted_password.hexdigest()
-    
+    email = request.form["email"]
+    password = request.form["password"]
+    password = password + key
+    password = hashlib.md5(password.encode())
+    password = password.hexdigest()
+
+    if ((email == "") or (password == "")):
+		return jsonify({"status": "error", "message": "email or password is incorrect"})
+
     res = spcall('list_users', ())
-    error = True
+    userinfo = {}
     
     for element in res:
-        # email element[4]
-        # password element[5]
-        if attempted_email == element[3]:
-            userinfo = {'firstname': element[0], 'lastname': element[1], 'middle_initial': element[2], 
-            'email': element[3], 'token':hashlib.md5( str(element[0] + element[4] ).encode()).hexdigest()}
-            user = User(element[0], element[1], element[2], element[3], element[4])
-            stored_password = element[4] # attempted_password should match this
-            error = False
-                  
-    
-    if error == True:
-        return jsonify({'status': 'error', 'message': 'email does not exist'})
-    if (attempted_password == stored_password):
-        return jsonify({'status': 'Successful', 'User_Information': userinfo,'message': 'Logged in successfully!'})
-    else:
-        return jsonify({'status': 'error', 'message': 'password or email is incorrect'})
+	if ((email == element[4]) and (password == element[7])):
+		userinfo = {"id": element[0], "fname": element[1], "lname": element[2], "minitial": element[3], "email": element[4], "user_location": element[5], "user_contact": element[6], "password": element[7]}
+	
+	if (len(userinfo) == 0):
+		return jsonify({"status": "error", "message": "email or password is incorrect"})
+	else:
+		return jsonify({"status": "200", "userinfo": userinfo, "message": "signed in"})
 
 
-@auth.login_required
+#@auth.login_required
 @app.route('/api/logout')
 def logout():
     """ User logout function """
@@ -173,9 +166,59 @@ def logout():
     for food in foods:
         food_id_list.append(food[0])
 
+# ====================================================================================
+@app.route("/api/user", methods = ["put"])
+def update_user():
+    """ the update user function """
+
+    id = request.form["id"]
+    fname = request.form["fname"]
+    lname = request.form["lname"]
+    minitial = request.form["minitial"]
+    email = request.form["email"]
+    user_location = request.form["user_location"]
+    user_contact = request.form["user_contact"]
+    password = request.form["password"]
+    password = password + key
+    password = hashlib.md5(password.encode())
+    password = password.hexdigest()
+    
+    if email == '':
+        return jsonify({'status': 'error', 'message': 'email cannot be blank'})
+    
+    email_validity = False
+    valid_email_ending = False
+    
+    
+    for endings in valid_endings:
+        if endings in email:
+            valid_email_ending = True
+            
+    if ("@" in email) and valid_email_ending:
+        email_validity = True    
+        
+    if  email_validity == False:
+        return jsonify({'status': 'error', 'message': 'invalid email'})    
+    
+    recs = spcall('list_users', ())
+    
+    if 'Error' in str(recs[0][0]):
+        return jsonify({'status': 'error', 'message': "error in list_users sp"})
+    for element in recs:
+        if email == str(element[4]):     # email
+            return jsonify({'status': 'error', 'message': 'email already exists'})
+
+    res = spcall("update_user", (id, fname, lname, minitial, email, user_location, user_contact, password ), True)
+
+    if "Error" in str(res[0][0]):
+        return jsonify({"status": "error", "message": res[0][0]})
+    else:
+        return jsonify({"status": "200", "message": "success"})
+
+
 ################# FOOD #####################
 
-@auth.login_required
+#@auth.login_required
 def get_restaurant():
 	""" Retrieves all restaurants in the database with is_active = True """
 
@@ -197,7 +240,7 @@ def get_restaurant():
             
 		return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
 
-@auth.login_required
+#@auth.login_required
 @app.route('/api/restaurant/<int:restaurant_id>', methods=['PUT'])
 def delete_restaurant(restaurant_id):
 	""" Delete a restaurant """
@@ -225,7 +268,7 @@ def delete_restaurant(restaurant_id):
 ############################################################################################
 
 
-@auth.login_required
+#@auth.login_required
 def get_food():
 	""" Retrieves all foods in the database with is_active = True """
 
@@ -246,7 +289,7 @@ def get_food():
             
 		return jsonify({'status': 'successful', 'entries': recs, 'count': len(recs)})
 
-@auth.login_required
+#s@auth.login_required
 @app.route('/api/food/<int:food_id>', methods=['PUT'])
 def delete_food(food_id):
 	""" Delete a food """
@@ -276,7 +319,7 @@ def delete_food(food_id):
 
 ###################### USER #########################
 
-@auth.login_required
+#@auth.login_required
 @app.route('/api/user', methods=['GET'])
 def get_users():
     """ Retrieves all users stored in the database """
@@ -298,7 +341,7 @@ def get_users():
 ######################################   FEEDBACK   ########################################
 
 
-@auth.login_required
+#@auth.login_required
 def add_feedback():
     """ Add a new feedback """
 
@@ -345,7 +388,7 @@ def add_feedback():
 			return jsonify({'status': 'error', 'message': 'an error was encountered'})
 
 
-@auth.login_required
+#@auth.login_required
 def get_feedback_by_restaurant(restaurant_id):
 	""" Retrieve all feedback of a particular restaurant """
 
@@ -376,7 +419,7 @@ def get_feedback_by_restaurant(restaurant_id):
 		return jsonify({'status': 'error', 'message': 'an error was encountered'})
 
 
-@auth.login_required
+#@auth.login_required
 def edit_feedback(restaurant_id, feedback_id):
 	""" Edit a particular feedback """
 
@@ -417,7 +460,7 @@ def edit_feedback(restaurant_id, feedback_id):
 			return jsonify({'status': 'error', 'message': 'an error was encountered'})
 
 
-@auth.login_required
+#@auth.login_required
 def delete_feedback(feedback_id):
 	""" Delete a feedback """
 	
@@ -443,7 +486,7 @@ def delete_feedback(feedback_id):
 
 ############################################################################################
 
-@auth.login_required
+#@auth.login_required
 @app.route('/profilepictures/<string:idnumber>', methods=['GET'])
 def get_profile_picture(idnumber):
     """ Retrieve the filename of the current profile picture """
@@ -456,7 +499,7 @@ def get_profile_picture(idnumber):
     return jsonify({'filename': filename})
 
 
-@auth.login_required
+#@auth.login_required
 @app.route('/profilepicture/<string:idnumber>', methods=['POST'])
 def upload_profile_picture(idnumber):
     """ Upload profile picture """
@@ -507,7 +550,7 @@ def upload_profile_picture(idnumber):
 
 #####################################################################################
 
-@auth.login_required
+#@auth.login_required
 @app.route('/restaurantpictures/<string:idnumber>', methods=['GET'])
 def get_restaurant_picture(idnumber):
     """ Retrieve the filename of the current restaurant picture """
@@ -520,7 +563,7 @@ def get_restaurant_picture(idnumber):
     return jsonify({'filename': filename})
 
 
-@auth.login_required
+#@auth.login_required
 @app.route('/restaurantpicture/<string:idnumber>', methods=['POST'])
 def upload_restaurant_picture(idnumber):
     """ Upload restaurant picture """
@@ -571,7 +614,7 @@ def upload_restaurant_picture(idnumber):
 
 #####################################################################################
 
-@auth.login_required
+#@auth.login_required
 @app.route('/foodpictures/<string:idnumber>', methods=['GET'])
 def get_food_picture(idnumber):
     """ Retrieve the filename of the current food picture """
@@ -584,7 +627,7 @@ def get_food_picture(idnumber):
     return jsonify({'filename': filename})
 
 
-@auth.login_required
+#@auth.login_required
 @app.route('/foodpicture/<string:idnumber>', methods=['POST'])
 def upload_food_picture(idnumber):
     """ Upload food picture """
