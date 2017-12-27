@@ -62,6 +62,10 @@ def userprofile():
 def about():
 	return render_template("about.html")
 
+@app.route("/signout", methods=["GET"])
+def signout():
+	return render_template("index.html")
+
 @app.route("/sidebarright", methods=["GET"])
 def sidebarright():
 	return render_template("sidebar-right.html")

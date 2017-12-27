@@ -19,43 +19,35 @@
         <!-- just to avoid complexity :) -->
         <script>
             function register()
-			{
-				console.log("success");
-				
-				var fname = $("#fname").val();
-				var lname = $("#lname").val();
-				var minitial = $("#minitial").val();
-				var email = $("#email").val();
-				var user_location = $("#user_location").val();
-				var user_contact = $("#user_contact").val();
-				var password = $("#password").val();
-				var confirm_password = $("#confirm_password").val();
-				
-				console.log(fname);
-				console.log(lname);
-				console.log(minitial);
-				console.log(email);
-				console.log(user_location);
-				console.log(user_contact);
-				console.log(password);
-				console.log(confirm_password);
-				
-				$.ajax({
-					url: "/api/registeruser",
-					type: "post",
-					dataType: "json",
-					data: {"fname": fname, "lname": lname, "minitial": minitial, "email": email, "user_location": user_location, "user_contact": user_contact, "password": password},
+            {
+                console.log("success");
+                
+                var fname = $("#fname").val();
+                var email = $("#email").val();
+                var password = $("#password").val();
+                var confirm_password = $("#confirm_password").val();
+                
+                console.log(fname);
+                console.log(email);
+                console.log(password);
+                console.log(confirm_password);
+                
+                $.ajax({
+                    url: "/api/registeruser",
+                    type: "post",
+                    dataType: "json",
+                    data: {"fname": fname, "email": email, "password": password},
                     error: function()
                     {
                         console.log("error");
                     },
-					success: function(data)
-					{
-						console.log("success");
+                    success: function(data)
+                    {
+                        console.log("success");
                         window.location.replace("/signin");
-					}
-				});
-			}
+                    }
+                });
+            }
         </script>
         <!-- ================================================================================= -->
     </head>
@@ -74,14 +66,8 @@
                     <ul class="nav navbar-nav pull-right">
                         <li><a href="/">Home</a></li>
                         <li><a href="/about">About</a></li>
-                        <li class="dropdown">
-                            <!-- a href="#" class="dropdown-toggle" data-toggle="dropdown">More Pages <b class="caret"></b></a -->
-                            <ul class="dropdown-menu">
-                                <li><a href="/sidebarleft">Left Sidebar</a></li>
-                                <li><a href="/sidebarright">Right Sidebar</a></li>
-                            </ul>
-                        </li>
-                        <li class="active"><a class="btn" href="/signin">SIGN IN / REGISTER</a></li>
+                        <li><a href="/signin">Log In</a></li>
+                        <li class="active"><a href="/signup">Register</a></li>
                     </ul>
                 </div>
                 <!--/.nav-collapse -->
@@ -105,24 +91,8 @@
                                 <hr>
                                 <form id="registrationForm">
                                     <div class="top-margin">
-                                        <label>First name</label>
+                                        <label>Name</label>
                                         <input id="fname" type="text" class="form-control">
-                                    </div>
-                                     <div class="top-margin">
-                                        <label>Middle Initial</label>
-                                        <input id="minitial" type="text" class="form-control">
-                                    </div>
-                                     <div class="top-margin">
-                                        <label>Last name</label>
-                                        <input id="lname" type="text" class="form-control">
-                                    </div>
-                                     <div class="top-margin">
-                                        <label>User location</label>
-                                        <input id="user_location" type="text" class="form-control">
-                                    </div>
-                                     <div class="top-margin">
-                                        <label>User Contact</label>
-                                        <input id="user_contact" type="text" class="form-control">
                                     </div>
                                     <div class="top-margin">
                                         <label>Email Address</label>
@@ -160,7 +130,7 @@
                         <div class="col-md-12 widget">
                             <div class="widget-body">
                                 <p class="text-right">
-                                    Copyright &copy; 2016, weTranslate Team. Designed by <a href="http://gettemplate.com/" rel="designer">gettemplate</a> 
+                                    Copyright &copy; 2016, FoodOnWheels Team. Designed by <a href="http://gettemplate.com/" rel="designer">gettemplate</a> 
                                 </p>
                             </div>
                         </div>
